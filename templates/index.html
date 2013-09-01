@@ -1,0 +1,64 @@
+<html lang="en" ng-app="simplesearch">
+    <head>
+        <link href="static/css/bootstrap.min.css" rel="stylesheet">
+        <title>Chongguang He</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+        body{
+            padding-top: 50px;
+        }
+        #id-side-bar {
+            position: fixed;
+            top: 80px;
+        }
+        .search-query {
+            padding-left: 14px;
+            padding-right: 14px;
+            margin-bottom: 0;
+            -webkit-border-radius: 14px;
+            -moz-border-radius: 14px;
+            border-radius: 14px;
+            border: 1px solid #ddd;
+        }
+        </style>
+    </head>
+    <body controller="search">
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Project name</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Django</a></li>
+                        <li><a href="#about">Flask</a></li>
+                        <li><a href="#contact">Pip</a></li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div id="id-side-bar" class="well affix" data-spy="affix" ng-controller="sidebarController">
+                        <div class="search">
+                            <input type="search" ng-model="search" placeholder="search" tabindex="1" accesskey="s" class="input-medium search-query">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="static/js/jquery-2.0.3.min.js"></script>
+    <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/angular.min.js"></script>
+    <script src="static/js/simplesearch.js"></script>
+</html>
