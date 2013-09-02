@@ -1,4 +1,4 @@
-var app = angular.module('simplesearch', [])
+var app = angular.module('simplelookup', [])
 
 .service('keyWord', function () {
     var keyword = "";
