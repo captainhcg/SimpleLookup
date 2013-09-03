@@ -5,18 +5,18 @@ import traceback
 
 import ast
 import os, os.path
-import db
+import parser_helper
 
 verbose = False
 source_code = []
 
 def parseNode(item, module_id=0, class_id=0, function_id=0):
+    call = parseOther
     if isinstance(item, ast.FunctionDef):
-        return parseFunction(item, module_id, class_id, function_id)
+        call = parseFunction
     elif isinstance(item, ast.ClassDef):
-        return parseClass(item, module_id, class_id, function_id)
-    else:
-        return parseOther(item, module_id, class_id, function_id)
+        call = parseClass
+    return call(item, module_id, class_id, function_id)
 
 def parseOther(item, module_id=0, class_id=0, function_id=0):
     lastLine = item.lineno
@@ -29,7 +29,7 @@ def parseOther(item, module_id=0, class_id=0, function_id=0):
 
 def parseFunction(item, module_id=0, class_id=0, function_id=0):
     global source_code, verbose
-    function_id = db.addFunction(item.name, module_id, class_id, function_id)
+    function_id = parser_helper.addFunction(item.name, module_id, class_id, function_id)
     start_line = item.lineno
     end_line = item.lineno
     for node in item.body:
@@ -37,34 +37,33 @@ def parseFunction(item, module_id=0, class_id=0, function_id=0):
 
     if verbose:
         print "function: %s"%item.name
-        print start_line, end_line
     code = u"".join(source_code[start_line: end_line+1])
-    db.setFunctionCode(function_id, code)
+    parser_helper.setFunctionCode(function_id, code)
     return end_line
 
 def parseClass(item, module_id=0, class_id=0, function_id=0):
     global source_code, verbose
-    class_id = db.addClass(item.name, module_id, class_id)
+    class_id = parser_helper.addClass(item.name, module_id, class_id)
     start_line = item.lineno
     end_line = item.lineno
     for node in item.body:
         end_line = parseNode(node, module_id, class_id, function_id)
+        # process attributes
+        # TODO: I dont think my solution is proper
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Attribute):
-                    db.addAttribute(target.attr, module_id, class_id, source_code[node.lineno])
+                    parser_helper.addAttribute(target.attr, module_id, class_id, source_code[node.lineno])
                 elif isinstance(target, ast.Name):
-                    db.addAttribute(target.id, module_id, class_id, source_code[node.lineno])
+                    parser_helper.addAttribute(target.id, module_id, class_id, source_code[node.lineno])
                 else:
                     # I do not know how to handle these cases
                     if verbose:
-                        print type(target)
-                        print source_code[node.lineno]
+                        print type(target), source_code[node.lineno]
     if verbose:
         print "class: %s"%item.name
-        print start_line, end_line
     code = "".join(source_code[start_line: end_line+1])
-    db.setClassCode(class_id, code)
+    parser_helper.setClassCode(class_id, code)
     return end_line
 
 def parseModule(source, module_id=0):
@@ -72,10 +71,7 @@ def parseModule(source, module_id=0):
     if not hasattr(tree, "body"):
         return
     for item in tree.body:
-        if isinstance(item, ast.FunctionDef):
-            parseFunction(item, module_id)
-        elif isinstance(item, ast.ClassDef):  
-            parseClass(item, module_id)
+        parseNode(item, module_id)
 
 def main(argv=sys.argv):
     global source_code
@@ -87,7 +83,7 @@ def main(argv=sys.argv):
         except:
             project_id = 0
     PROJECT_PATH = settings.PROJECTS[project_id]["PROJECT_PATH"]
-    db.reset(project_id=project_id)
+    parser_helper.reset(project_id=project_id)
     for root, dirs, files in os.walk(PROJECT_PATH):
         name_offset = len(settings.FILE_EXTENSION)
         path_offset = len(PROJECT_PATH)
@@ -95,7 +91,7 @@ def main(argv=sys.argv):
             if f.endswith(settings.FILE_EXTENSION):
                 fullpath = os.path.join(root, f)
                 source_code = []
-                module_id = db.addModule(f[:-name_offset], root[path_offset:])
+                module_id = parser_helper.addModule(f[:-name_offset], root[path_offset:])
                 try:
                     with open(fullpath, "rb") as f:
                         source_code.append("")

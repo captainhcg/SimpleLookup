@@ -1,0 +1,14 @@
+FILE_EXTENSION = ".py"
+
+PROJECTS = [
+    {
+        "NAME": "Django", 
+        "DB_NAME": "DJANGO",
+        "PROJECT_PATH": "/Users/foo/vitualenvs/drc/lib/python2.7/site-packages/django/"
+    },
+    {
+        "NAME": "Flask",
+        "DB_NAME": "FLASK",
+        "PROJECT_PATH": "/Users/foo/vitualenvs/drc/lib/python2.7/site-packages/flask/"
+    },  
+]
