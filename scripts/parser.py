@@ -3,7 +3,6 @@ sys.path.append('../')
 import settings
 import traceback
 
-import inspect
 import ast
 import os, os.path
 import db
@@ -51,7 +50,16 @@ def parseClass(item, module_id=0, class_id=0, function_id=0):
     for node in item.body:
         end_line = parseNode(node, module_id, class_id, function_id)
         if isinstance(node, ast.Assign):
-            db.addAttribute(item.name, module_id, class_id, source_code[node.lineno])
+            for target in node.targets:
+                if isinstance(target, ast.Attribute):
+                    db.addAttribute(target.attr, module_id, class_id, source_code[node.lineno])
+                elif isinstance(target, ast.Name):
+                    db.addAttribute(target.id, module_id, class_id, source_code[node.lineno])
+                else:
+                    # I do not know how to handle these cases
+                    if verbose:
+                        print type(target)
+                        print source_code[node.lineno]
     if verbose:
         print "class: %s"%item.name
         print start_line, end_line
