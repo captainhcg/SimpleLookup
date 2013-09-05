@@ -1,9 +1,8 @@
 import sys
-sys.path.append('../')
 import settings
 import sqlite3
 
-DB_NAME = settings.PROJECTS[0]["DB_NAME"]
+DB_NAME = ""
 def reset(project_id=0):
     global DB_NAME
     DB_NAME = settings.PROJECTS[project_id]["DB_NAME"]
