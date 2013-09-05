@@ -33,6 +33,36 @@
         }
     })
 
+    .directive('simpleSearch', ["$parse", function($parse) {
+        return function(scope, element, attrs) {
+            var ngModel = $parse(attrs.ngModel);
+            element.autocomplete({
+                source: "/list",
+                minLength: 3,
+                focus: function(event, ui) {
+                    event.preventDefault(); //Don't preopulate field
+                },
+                select : function(event, data) {
+                    if (data) {
+                        event.preventDefault(); //Keep entry blank
+                        if(ngModel){
+                            scope.$apply(function(scope){
+                                data.item.toString = function(){
+                                    return data.item.name;
+                                }
+                                ngModel.assign(scope, data.item);
+                            });
+                        }
+                    }
+                }
+            }).data( "ui-autocomplete" )._renderItem = function(ul, item) {
+                return jQuery( "<li>" )
+                    .append( "<a>"+item.label+"<br><small style='color: blue'>"+item.desc+"</small></a>" )
+                    .appendTo( ul );
+                };
+            }
+    }])
+
     // resources
     .service(
         'search_resources',
@@ -64,7 +94,7 @@
 
         $scope.$watch("search", function(nv){
             if(nv){
-                search(nv);
+                // search(nv);
             }
         })
     }])

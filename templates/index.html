@@ -1,6 +1,7 @@
 <html lang="en" ng-app="simplelookup">
     <head>
         <link href="static/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
         <title>Chongguang He</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,6 +26,10 @@
         }
         a:hover{
             cursor: pointer;;
+        }
+        .ui-autocomplete li.ui-menu-item {
+            font-size: 13px;
+            line-height: 16px;
         }
         </style>
     </head>
@@ -56,7 +61,7 @@
                 </div>
                 <div class="col-md-9">
                     <div class="col-md-12" style="margin-top: 20px">
-                        <input type="search" ng-model="search" placeholder="search" tabindex="1" accesskey="s" class="search-query" style="width: 100%">
+                        <input type="search" simple-search ng-model="search" placeholder="search" tabindex="1" accesskey="s" class="search-query" style="width: 100%">
                     </div>
                 </div>
             </div>
@@ -67,4 +72,5 @@
     <script src="static/js/angular.min.js"></script>
     <script src="static/js/angular-resource.min.js"></script>
     <script src="static/js/simplelookup.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 </html>

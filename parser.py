@@ -81,26 +81,31 @@ def main(argv=sys.argv):
             project_id = int(argv[1])
         except:
             project_id = 0
-    PROJECT_PATH = settings.PROJECTS[project_id]["PROJECT_PATH"]
+    project_path = settings.PROJECTS[project_id]["PROJECT_PATH"]
     parser_helper.reset(project_id=project_id)
-    for root, dirs, files in os.walk(PROJECT_PATH):
+    for root, dirs, files in os.walk(project_path):
         name_offset = len(settings.FILE_EXTENSION)
-        path_offset = len(PROJECT_PATH)
+        path_offset = len(project_path)
         for f in files:
             if f.endswith(settings.FILE_EXTENSION):
                 fullpath = os.path.join(root, f)
                 source_code = []
                 module_id = parser_helper.addModule(f[:-name_offset], root[path_offset:])
                 try:
+                    print fullpath
                     with open(fullpath, "rb") as f:
                         source_code.append("")
                         for line in f:
-                           source_code.append(line.decode('utf-8')) 
+                            try:
+                                source_code.append(line.decode('utf-8'))
+                            except UnicodeDecodeError:
+                                source_code.append(line.decode('iso-8859-1'))
                     with open(fullpath, "rb") as f:
                         parseModule(f.read(), module_id=module_id)
                 except Exception as e:
                     traceback.print_exc()
                     exit()
+    parser_helper.closeConn()
 
 if __name__ == "__main__":
     main()
