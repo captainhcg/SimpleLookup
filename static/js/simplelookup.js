@@ -167,7 +167,14 @@
             $scope.result_history.splice(0, 0, obj);
             if($scope.result_history.length > 15)
                 $scope.result_history.pop()
-            $scope.localStorageService.set('history', $window.JSON.stringify($scope.result_history));
+
+            $scope.localStorageService.set('history', $window.JSON.stringify($scope.result_history, function (key, val) {
+                    if (key == '$$hashKey') {
+                        return undefined;
+                    }
+                    return val;
+                })
+            );
         }
 
         $scope.result_history = []
