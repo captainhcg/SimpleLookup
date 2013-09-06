@@ -123,6 +123,12 @@
             $scope.info.project_id = $scope.localStorageService.get("project_id") || 0;
         }
 
+        $scope.clearHistory = function(){
+            $scope.record = null;
+            $scope.result_history = [];
+            saveHistory();
+        }
+
         $scope.resetView = function(){
             $scope.result = {}
             $scope.attrs = []
@@ -158,6 +164,17 @@
                 }            
             )
         }
+
+        var saveHistory = function(){
+            $scope.localStorageService.set('history', $window.JSON.stringify($scope.result_history, function (key, val) {
+                    if (key == '$$hashKey') {
+                        return undefined;
+                    }
+                    return val;
+                })
+            );
+        }
+
         var pushResult = function(obj){
             var index = -1;
             for(var i=$scope.result_history.length-1; i>=0; i--){
@@ -169,14 +186,7 @@
             $scope.result_history.splice(0, 0, obj);
             if($scope.result_history.length > 15)
                 $scope.result_history.pop()
-
-            $scope.localStorageService.set('history', $window.JSON.stringify($scope.result_history, function (key, val) {
-                    if (key == '$$hashKey') {
-                        return undefined;
-                    }
-                    return val;
-                })
-            );
+            saveHistory();
         }
 
         $scope.result_history = []

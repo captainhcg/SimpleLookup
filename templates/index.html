@@ -36,10 +36,8 @@
             padding-left: 14px;
             padding-right: 14px;
             margin-bottom: 0;
-            -webkit-border-radius: 14px;
-            -moz-border-radius: 14px;
-            border-radius: 14px;
             border: 1px solid #ddd;
+            border-right: 0;
             line-height: 24px;
             font-size: 16px;
         }
@@ -87,7 +85,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Project name</a>
+                    <a class="navbar-brand">Simple Lookup</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav">
@@ -102,7 +100,12 @@
         <div style="width: 100%; height: 100%; display: table;">
             <div id="side-bar-container">
                 <div id="side-bar">
-                    <input type="search" simple-search ng-model="record" placeholder="search" tabindex="1" accesskey="s" class="search-query" style="width: 100%">
+                    <div class="input-group">
+                        <input type="search" simple-search ng-model="record" placeholder="search" tabindex="1" accesskey="s" class="search-query form-control" style="width: 100%">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" ng-click="clearHistory()"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
+                        </span>
+                    </div>
                     <ul style="padding-left: 0; margin-top: 10px">
                         <li class="record_li" ng-repeat="r in result_history" ng-click="searchRecord(r)">
                             <a>[[r.label]]</a><br>
