@@ -1,7 +1,8 @@
 <html lang="en" ng-app="simplelookup">
     <head>
-        <link href="static/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="static/css/bootstrap.min.css">
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        <link rel="stylesheet" href ="static/css/prettify.default.css" />
         <title>Chongguang He</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,9 +10,23 @@
         body{
             padding-top: 50px;
         }
-        #id-side-bar {
+        #side-bar-container{
+            display: table-cell;
+            vertical-align: top;
+            background-color: #f9f9f9;
+            width: 300px;
+            padding: 20px;
+            border-left: 1px solid #eee;
+        }
+        #side-bar {
             position: fixed;
-            top: 80px;
+            top: 70px;
+            width: 260px;
+        }
+        #main{
+            display: table-cell;
+            vertical-align: top;
+            padding: 20px 10px;
         }
         .search-query {
             padding-left: 14px;
@@ -25,11 +40,31 @@
             font-size: 16px;
         }
         a:hover{
-            cursor: pointer;;
+            cursor: pointer;
         }
         .ui-autocomplete li.ui-menu-item {
             font-size: 13px;
             line-height: 16px;
+        }
+        .record_li{
+            list-style-type: none;
+            padding-left: 0px;
+            word-wrap: break-word;
+            margin-bottom: 5px;
+        }
+        .record_li a{
+            font-weight: bold;
+        }
+        .record_li a:hover{
+            text-decoration: none;
+        }
+        .record_li:hover{
+            cursor: pointer;
+        }
+        pre{
+            font-size: 12px;
+            background-color: transparent;
+            border: none;
         }
         </style>
     </head>
@@ -51,18 +86,28 @@
                         {% endfor %}
                     </ul>
                 </div><!--/.nav-collapse -->
+                <input id="project_id" type="hidden" value="[[info.project_id]]" ng-model="info.project_id">
             </div>
         </div>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <div id="id-side-bar" class="well affix" data-spy="affix" ng-controller="sidebarController">
+        <div style="width: 100%; height: 100%; display: table;">
+            <div id="side-bar-container">
+                <div id="side-bar">
+                    <input type="search" simple-search ng-model="record" placeholder="search" tabindex="1" accesskey="s" class="search-query" style="width: 100%">
+                    <ul style="padding-left: 0; margin-top: 10px">
+                        <li class="record_li" ng-repeat="r in result_history" ng-click="searchRecord(r)">
+                            <a>[[r.label]]</a><br>
+                            <small>[[r.desc]]</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div id="main">
+                <div style="width: 70%">        
+                    <div ng-show="result.code">
+                        <pre class="prettyprint lang-py linenums" id="id_source_code" ng-bind="result.code"></pre>
                     </div>
                 </div>
-                <div class="col-md-9">
-                    <div class="col-md-12" style="margin-top: 20px">
-                        <input type="search" simple-search ng-model="search" placeholder="search" tabindex="1" accesskey="s" class="search-query" style="width: 100%">
-                    </div>
+                <div>     
                 </div>
             </div>
         </div>
@@ -73,4 +118,6 @@
     <script src="static/js/angular-resource.min.js"></script>
     <script src="static/js/simplelookup.js"></script>
     <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="static/js/prettify.js"></script>
+    <!-- <script src="static/js/run_prettify.js?autoload=false&skin=sunburst"></script> -->
 </html>

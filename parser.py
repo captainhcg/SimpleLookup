@@ -1,7 +1,7 @@
 import sys
 import settings
 import traceback
-
+import re
 import ast
 import os, os.path
 import parser_helper
@@ -81,18 +81,31 @@ def main(argv=sys.argv):
             project_id = int(argv[1])
         except:
             project_id = 0
-    project_path = settings.PROJECTS[project_id]["PROJECT_PATH"]
+    project_settings = settings.PROJECTS[project_id]
+    project_path = project_settings["PROJECT_PATH"]
     parser_helper.reset(project_id=project_id)
+    folder_exclude_patterns = []
+    if "FOLDER_EXCLUDE_PATTERNS" in project_settings:
+        for pattern in project_settings['FOLDER_EXCLUDE_PATTERNS']:
+            folder_exclude_patterns.append(re.compile(pattern))
     for root, dirs, files in os.walk(project_path):
+        continue_flag = False
+        if folder_exclude_patterns:
+            for pattern in folder_exclude_patterns:
+                if pattern.search(root):
+                    continue_flag = True
+                    break
+        if continue_flag:
+            continue
         name_offset = len(settings.FILE_EXTENSION)
         path_offset = len(project_path)
         for f in files:
             if f.endswith(settings.FILE_EXTENSION):
                 fullpath = os.path.join(root, f)
+                print fullpath
                 source_code = []
                 module_id = parser_helper.addModule(f[:-name_offset], root[path_offset:])
                 try:
-                    print fullpath
                     with open(fullpath, "rb") as f:
                         source_code.append("")
                         for line in f:
