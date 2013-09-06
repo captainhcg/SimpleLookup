@@ -135,6 +135,8 @@
             var request = obj
             $scope.resetView();
             $scope.request_id += 1;
+            if("project_id" in obj)
+                $scope.info.project_id = obj.project_id;
             var this_request_id = $scope.request_id;
             $scope.resource.search(obj).$then(
                 function(data){
