@@ -10,6 +10,10 @@
         body{
             padding-top: 50px;
         }
+        .table_cell{
+            display: table-cell;
+            vertical-align: top;            
+        }
         #side-bar-container{
             display: table-cell;
             vertical-align: top;
@@ -41,22 +45,28 @@
         }
         a:hover{
             cursor: pointer;
+            text-decoration: none;
         }
         .ui-autocomplete li.ui-menu-item {
             font-size: 13px;
             line-height: 16px;
         }
-        .record_li{
+        ul{
+            padding-left: 0px;
+        }
+        li{
             list-style-type: none;
             padding-left: 0px;
-            word-wrap: break-word;
+            word-wrap: break-word;   
+        }
+        .linenums li{
+            list-style-type: decimal;
+        }
+        .record_li{
             margin-bottom: 5px;
         }
         .record_li a{
             font-weight: bold;
-        }
-        .record_li a:hover{
-            text-decoration: none;
         }
         .record_li:hover{
             cursor: pointer;
@@ -102,12 +112,38 @@
                 </div>
             </div>
             <div id="main">
-                <div style="width: 70%">        
+                <div class="pull-left" style="width: 70%">        
                     <div ng-show="result.code">
-                        <pre class="prettyprint lang-py linenums" id="id_source_code" ng-bind="result.code"></pre>
+                        <pre class="prettyprint linenums lang-py" id="id_source_code" ng-bind="result.code">
+                        </pre>
                     </div>
                 </div>
-                <div>     
+                <div class="pull-left" style="width: 29%">
+                    <div ng-show="attrs" style="padding-left: 30px; float: left">
+                        <h4>Attributes</h4>
+                        <ul>
+                            <li ng-repeat="attr in attrs">
+                                <a ng-click="attr.display = !attr.display">[[attr.name]]</a>
+                                <br><small ng-show="attr.display">[[attr.code]]</small>
+                            </li>
+                        </ul>
+                    </div>
+                    <div ng-show="functions" style="padding-left: 30px; float: left">
+                        <h4>Functions</h4>
+                        <ul>
+                            <li ng-repeat="fun in functions">
+                                <a ng-click="searchRecord(fun)">[[fun.name]]</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div ng-show="classes" style="padding-left: 30px; float: left">
+                        <h4>Classes</h4>
+                        <ul>
+                            <li ng-repeat="class in classes">
+                                <a ng-click="searchRecord(class)">[[class.name]]</a>
+                            </li>
+                        </ul>
+                    </div>     
                 </div>
             </div>
         </div>

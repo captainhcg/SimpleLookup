@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, jsonify, g
 import Levenshtein
 import settings
-import simplejson
 from functools import wraps
 import sqlite3
 
@@ -24,7 +23,7 @@ def init_global(function):
     return wrap
 
 @app.route('/')
-def hello_world():
+def index():
     return render_template('index.html', projects=projects)
 
 @app.route('/search')
@@ -57,9 +56,10 @@ def searchFunction(query):
         "class_name": row[7],
         "code": row[3]
     }
-    return jsonify({"data": data})
+    return jsonify({"result": data})
 
 def searchClass(query):
+    project_id = g.project_id
     record_id = query.get('id')
     conn = g.conn
     c = conn.cursor()
@@ -76,13 +76,84 @@ def searchClass(query):
         "code": row[3]
     }
     attrs = []
-    for row in c.execute("SELECT id, name, code FROM attribute WHERE class_id = ?", (record_id, )):
+    for row in c.execute("SELECT id, name, code FROM attribute WHERE class_id = ? ORDER BY name", (record_id, )):
         attrs.append({
             "id": row[0],
             "name": row[1],
-            "code": row[2]
+            "code": row[2].split("=", 1)[-1].strip()
         })
-    return jsonify({"data": data, "attrs": attrs})
+    functions = []
+    for row in c.execute("SELECT f.id, f.name, f.module_id, f.class_id, m.path, m.name, c.name FROM function as f INNER JOIN module AS m ON f.module_id = m.id LEFT JOIN class AS c ON f.class_id = c.id WHERE f.class_id = ?", (record_id,)):
+        record_type = "method"
+        if row[6]:
+            record_desc = "%s/%s.%s.%s()"%(row[4], row[5], row[6], row[1])
+        else:
+            record_desc = "%s/%s.%s()"%(row[4], row[5], row[1])
+        functions.append({
+            "id": row[0],
+            "project_id": project_id,
+            "name": row[1],
+            "label": row[1]+"()",
+            "desc": record_desc,
+            "value": row[0],
+            "type": record_type,
+            "module": row[2],
+            "class": row[3],
+        })
+    return jsonify({"result": data, "attrs": attrs, "functions": functions})
+
+def searchModule(query):
+    project_id = g.project_id
+    record_id = query.get('id')
+    conn = g.conn
+    c = conn.cursor()
+    c.execute("SELECT id, name, path FROM module WHERE id = ?", (record_id, ))
+    row = c.fetchone()
+    data = {
+        "id": row[0],
+        "project_id": project_id,
+        "name": row[1],
+        "label": row[1],
+        "desc": "%s/%s.py"%(row[2], row[1]),
+        "path": row[2],
+        "type": "module",
+    }
+
+    classes = []
+    for row in c.execute("SELECT c.id, c.name, c.module_id, m.path, m.name FROM class AS c INNER JOIN module AS m ON c.module_id = m.id WHERE m.id = ? AND c.class_id = 'NULL'", (record_id, )):
+        classes.append({
+            "id": row[0],
+            "project_id": project_id,
+            "name": row[1],
+            "label": "class "+row[1],
+            "desc": "%s/%s.%s"%(row[3], row[4], row[1]),
+            "type": "class",
+            "module_id": row[2],
+            "module_path": row[3],
+            "module_name": row[4],
+        })
+
+    functions = []
+    for row in c.execute("SELECT f.id, f.name, f.module_id, f.class_id, m.path, m.name, c.name FROM function as f INNER JOIN module AS m ON f.module_id = m.id LEFT JOIN class AS c ON f.class_id = c.id WHERE f.class_id = 'NULL' AND f.module_id = ?", (record_id,)):
+        record_type = "method"
+        if row[6]:
+            record_desc = "%s/%s.%s.%s()"%(row[4], row[5], row[6], row[1])
+        else:
+            record_desc = "%s/%s.%s()"%(row[4], row[5], row[1])
+        functions.append({
+            "id": row[0],
+            "project_id": project_id,
+            "name": row[1],
+            "label": row[1]+"()",
+            "desc": record_desc,
+            "type": record_type,
+            "module_id": row[2],
+            "module_path": row[4],
+            "module_name": row[5],
+            "class_name": row[6],
+            "class_id": row[3],
+        })
+    return jsonify({"result": data, "classes": classes, "functions": functions})
 
 @app.route('/list')
 @init_global
@@ -115,7 +186,6 @@ def list(**kwargs):
                 "name": row[1],
                 "label": row[1],
                 "desc": "%s/%s.py"%(row[2], row[1]),
-                "value": row[0],
                 "type": "module",
                 "distance": Levenshtein.distance(keyword, row[1].lower())
             })
@@ -128,7 +198,6 @@ def list(**kwargs):
                 "name": row[1],
                 "label": "class "+row[1],
                 "desc": "%s/%s.%s"%(row[3], row[4], row[1]),
-                "value": row[0],
                 "type": "class",
                 "module": row[2],
                 "distance": Levenshtein.distance(keyword, row[1].lower())
@@ -147,7 +216,6 @@ def list(**kwargs):
                 "name": row[1],
                 "label": row[1]+"()",
                 "desc": record_desc,
-                "value": row[0],
                 "type": record_type,
                 "module": row[2],
                 "class": row[3],

@@ -111,27 +111,45 @@
     ])
 
     .controller("searchController", ["$scope", "search_resources", "$window", "localStorageService", function($scope, search_resources, $window, localStorageService){
+        $scope.request_id = 1;
+
         $scope.init = function(){
             $scope.resource = search_resources.lookUpResource;
             $scope.info = {
                 project_id: 0,
             }
-            $scope.result_history = []
             $scope.localStorageService = localStorageService;
+            $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history")) || []
             $scope.info.project_id = $scope.localStorageService.get("project_id") || 0;
         }
 
-        $scope.searchRecord = function(obj){
-            var request = obj
+        $scope.resetView = function(){
             $scope.result = {}
+            $scope.attrs = []
+            $scope.functions = []
+            $scope.classes = []
+        }
+
+        $scope.searchRecord = function(obj){
+            pushResult(obj);
+            var request = obj
+            $scope.resetView();
+            $scope.request_id += 1;
+            var this_request_id = $scope.request_id;
             $scope.resource.search(obj).$then(
                 function(data){
+                    if(this_request_id != $scope.request_id)
+                        return false;
+                    $window.scrollTo(0, 0);
                     var response = data.data;
-                    $scope.result = response.data
+                    $scope.result = response.result;
+                    $scope.attrs = response.attrs || [];
+                    $scope.functions = response.functions || []
+                    $scope.classes = response.classes || []
                     window.setTimeout(function(){
                         $window.jQuery("#id_source_code").removeClass("prettyprinted")
                         $window.prettyPrint()
-                    }, 100);
+                    }, 10);
                 },
                 function(){
                     $scope.loading = false;
@@ -139,6 +157,7 @@
             )
         }
         var pushResult = function(obj){
+            console.log(obj)
             var index = -1;
             for(var i=$scope.result_history.length-1; i>=0; i--){
                 var r = $scope.result_history[i];
@@ -147,13 +166,15 @@
                 }
             }
             $scope.result_history.splice(0, 0, obj);
+            if($scope.result_history.length > 15)
+                $scope.result_history.pop()
+            $scope.localStorageService.set('history', $window.JSON.stringify($scope.result_history));
         }
 
         $scope.result_history = []
 
         $scope.$watch("record", function(nv){
             if(nv && typeof nv === "object"){
-                pushResult(nv);
                 $scope.searchRecord(nv);
             }
         })
