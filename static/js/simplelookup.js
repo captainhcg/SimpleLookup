@@ -157,7 +157,6 @@
             )
         }
         var pushResult = function(obj){
-            console.log(obj)
             var index = -1;
             for(var i=$scope.result_history.length-1; i>=0; i--){
                 var r = $scope.result_history[i];

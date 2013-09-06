@@ -4,11 +4,17 @@ PROJECTS = [
     {
         "NAME": "Django", 
         "DB_NAME": "DJANGO",
-        "PROJECT_PATH": "/Users/foo/vitualenvs/drc/lib/python2.7/site-packages/django/"
+        "PROJECT_PATH": "/usr/lib/python2.6/site-packages/django/"
     },
     {
         "NAME": "Flask",
         "DB_NAME": "FLASK",
-        "PROJECT_PATH": "/Users/foo/vitualenvs/drc/lib/python2.7/site-packages/flask/"
+        "PROJECT_PATH": "/usr/lib/python2.6/site-packages/flask/"
     },  
+    {
+        "NAME": "Gevent",
+        "DB_NAME": "GEVENT",
+        "PROJECT_PATH": "/usr/lib/python2.6/site-packages/gevent/"
+    },
+
 ]
