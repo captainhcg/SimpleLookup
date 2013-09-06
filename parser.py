@@ -95,7 +95,7 @@ def parseModule(source, module_id=0, depth=0):
         parseNode(item, module_id, depth+1)
 
 def main(argv=sys.argv):
-    global source_code, source_code_len
+    global source_code, lines_depth, source_code_len
     if len(argv)<2:
         project_id = 0
     else:
@@ -125,6 +125,7 @@ def main(argv=sys.argv):
             if f.endswith(settings.FILE_EXTENSION):
                 fullpath = os.path.join(root, f)
                 source_code = []
+                lines_depth = []
                 module_id = parser_helper.addModule(f[:-name_offset], root[path_offset:])
                 try:
                     with open(fullpath, "rb") as f:
