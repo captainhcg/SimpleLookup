@@ -3,6 +3,7 @@ import Levenshtein
 import settings
 from functools import wraps
 import sqlite3
+import sys, os
 
 app = Flask(__name__)
 projects=settings.PROJECTS
@@ -18,7 +19,7 @@ def init_global(function):
             g.project_id = 2
         print g.project_id
         db_name = settings.PROJECTS[g.project_id]["DB_NAME"]
-        with sqlite3.connect('db/%s.db'%db_name) as g.conn:
+        with sqlite3.connect(os.path.dirname(__file__)+'/db/%s.db'%db_name) as g.conn:
             return function(*args, **kwargs)
     return wrap
 
