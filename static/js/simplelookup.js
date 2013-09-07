@@ -37,8 +37,8 @@
         'localStorageService', ['$window', function($window){   
             var supports_html5_storage = function (){
             try {
-                    if('localStorage' in window && window['localStorage'] !== null){
-                        window.localStorage.setItem('drchrono', true);
+                    if('localStorage' in $window && $window['localStorage'] !== null){
+                        $window.localStorage.setItem('drchrono', true);
                         return true;
                     } else {
                         return false;
@@ -50,12 +50,12 @@
             this._supports_html5_storage = supports_html5_storage();
             this.get = function(key){
                 if(this._supports_html5_storage){
-                    return window.localStorage.getItem(key, true);
+                    return $window.localStorage.getItem(key, true);
                 }
             }
             this.set = function(key, value){
                 if(this._supports_html5_storage){
-                    window.localStorage.setItem(key, value);
+                    $window.localStorage.setItem(key, value);
                 }
             }
         }]

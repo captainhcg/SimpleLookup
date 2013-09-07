@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, g
+from flask.ext.sqlalchemy import SQLAlchemy
 import Levenshtein
 import settings
 from functools import wraps
@@ -7,17 +8,17 @@ import sys, os
 
 app = Flask(__name__)
 projects=settings.PROJECTS
-app.config['SECRET_KEY'] = '<replace with a secret key>'
 
 # alway pass project_id to view
 def init_global(function):
     @wraps(function)
     def wrap(*args, **kwargs):
+        global app
         try:
             g.project_id = int(request.args.get('project_id', 2))
         except:
             g.project_id = 2
-        print g.project_id
+        
         db_name = settings.PROJECTS[g.project_id]["DB_NAME"]
         with sqlite3.connect(os.path.dirname(__file__)+'/db/%s.db'%db_name) as g.conn:
             return function(*args, **kwargs)
