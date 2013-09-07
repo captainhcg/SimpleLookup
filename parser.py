@@ -4,13 +4,13 @@ import traceback
 import re
 import ast
 import os, os.path
-import parser_helper
-
+from models import Module, Class, Function, Attribute
+from models import setProject, resetDB
 source_code = []
 lines_depth = []
 source_code_len = 0
 
-def parseNode(item, module_id=0, class_id=0, function_id=0, depth=0):
+def parseNode(item, module_id=None, class_id=None, function_id=None, depth=0):
     call = parseOther
     if isinstance(item, ast.FunctionDef):
         call = parseFunction
@@ -40,7 +40,7 @@ def getSourceCode(start_line, end_line):
         code.pop()
     return "".join(code)
 
-def parseOther(item, module_id=0, class_id=0, function_id=0, depth=0):
+def parseOther(item, module_id=None, class_id=None, function_id=None, depth=0):
     lastLine = item.lineno
     if hasattr(item, "body"):
         if not isinstance(item.body, list):
@@ -50,8 +50,9 @@ def parseOther(item, module_id=0, class_id=0, function_id=0, depth=0):
             lastLine = parseNode(node, module_id, class_id, function_id, depth+1)
     return lastLine
 
-def parseFunction(item, module_id=0, class_id=0, function_id=0, depth=0):
-    function_id = parser_helper.addFunction(item.name, module_id, class_id, function_id, depth+1)
+def parseFunction(item, module_id=None, class_id=None, function_id=None, depth=0):
+    fun = Function.addFunction(name=item.name, module_id=module_id, class_id=class_id, function_id=function_id)
+    function_id = fun.id
     start_line = item.lineno
     end_line = item.lineno
     markLineDepth(item, depth)
@@ -59,11 +60,14 @@ def parseFunction(item, module_id=0, class_id=0, function_id=0, depth=0):
         end_line = parseNode(node, module_id, class_id, function_id, depth+1)
     end_line = getLastLine(end_line, depth)
     code = getSourceCode(start_line, end_line)
-    parser_helper.setFunctionCode(function_id, code)
+    fun.code = code
+    fun.save()
     return end_line
 
-def parseClass(item, module_id=0, class_id=0, function_id=0, depth=0):
-    class_id = parser_helper.addClass(item.name, module_id, class_id, depth+1)
+def parseClass(item, module_id=None, class_id=None, function_id=None, depth=0):
+    global source_code
+    cls = Class.addClass(name=item.name, module_id=module_id, class_id=class_id)
+    class_id = cls.id
     start_line = item.lineno
     end_line = item.lineno
     markLineDepth(item, depth)
@@ -74,19 +78,24 @@ def parseClass(item, module_id=0, class_id=0, function_id=0, depth=0):
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Attribute):
-                    parser_helper.addAttribute(target.attr, module_id, class_id, source_code[node.lineno])
+                    attr = Attribute.addAttribute(name=target.attr, module_id=module_id, class_id=class_id)
+                    attr.code = source_code[node.lineno]
+                    attr.save()
                 elif isinstance(target, ast.Name):
-                    parser_helper.addAttribute(target.id, module_id, class_id, source_code[node.lineno])
+                    attr = Attribute.addAttribute(name=target.id, module_id=module_id, class_id=class_id)
+                    attr.code = source_code[node.lineno]
+                    attr.save()
                 else:
                     # I do not know how to handle these cases
                     # print type(target), source_code[node.lineno]
                     pass
     end_line = getLastLine(end_line, depth)
     code = getSourceCode(start_line, end_line)
-    parser_helper.setClassCode(class_id, code)
+    cls.code = code
+    cls.save()
     return end_line
 
-def parseModule(source, module_id=0, depth=0):
+def parseModule(source, module_id=None, depth=0):
     tree = ast.parse(source)
     if not hasattr(tree, "body"):
         return
@@ -103,9 +112,11 @@ def main(argv=sys.argv):
             project_id = int(argv[1])
         except:
             project_id = 0
+    setProject(project_id)
+    resetDB();
+
     project_settings = settings.PROJECTS[project_id]
-    project_path = project_settings["PROJECT_PATH"]
-    parser_helper.reset(project_id=project_id)
+    project_path = project_settings['PROJECT_PATH']
     folder_exclude_patterns = []
     if "FOLDER_EXCLUDE_PATTERNS" in project_settings:
         for pattern in project_settings['FOLDER_EXCLUDE_PATTERNS']:
@@ -126,7 +137,8 @@ def main(argv=sys.argv):
                 fullpath = os.path.join(root, f)
                 source_code = []
                 lines_depth = []
-                module_id = parser_helper.addModule(f[:-name_offset], root[path_offset:])
+                module = Module.addModule(name=f[:-name_offset], path=root[path_offset:])
+                module_id = module.id
                 try:
                     with open(fullpath, "rb") as f:
                         print fullpath
@@ -144,7 +156,6 @@ def main(argv=sys.argv):
                 except Exception as e:
                     traceback.print_exc()
                     exit()
-    parser_helper.closeConn()
 
 if __name__ == "__main__":
     main()

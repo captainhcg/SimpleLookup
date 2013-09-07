@@ -18,9 +18,10 @@ def init_global(function):
             g.project_id = int(request.args.get('project_id', 2))
         except:
             g.project_id = 2
-        
         db_name = settings.PROJECTS[g.project_id]["DB_NAME"]
-        with sqlite3.connect(os.path.dirname(__file__)+'/db/%s.db'%db_name) as g.conn:
+        print os.path.dirname(__file__)
+        print os.path.dirname(__file__)+'db/%s.db'%db_name
+        with sqlite3.connect(os.path.dirname(__file__)+'db/%s.db'%db_name) as g.conn:
             return function(*args, **kwargs)
     return wrap
 

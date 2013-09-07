@@ -2,4 +2,5 @@ settings.py
 simplelookup.sublime*
 .DS_Store
 *.db
+*.sqlite
 *.pyc
