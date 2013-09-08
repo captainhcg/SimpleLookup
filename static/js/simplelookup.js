@@ -153,6 +153,7 @@
                     $scope.result = response.result;
                     $scope.attrs = response.attrs || [];
                     $scope.functions = response.functions || []
+                    $scope.methods = response.methods || []
                     $scope.classes = response.classes || []
                     window.setTimeout(function(){
                         $window.jQuery("#id_source_code").removeClass("prettyprinted")

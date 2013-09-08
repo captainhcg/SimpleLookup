@@ -101,7 +101,7 @@ def parseModule(source, module_id=None, depth=0):
         return
     markLineDepth(tree, depth)
     for item in tree.body:
-        parseNode(item, module_id, depth+1)
+        parseNode(item, module_id=module_id, depth=depth+1)
 
 def main(argv=sys.argv):
     global source_code, lines_depth, source_code_len

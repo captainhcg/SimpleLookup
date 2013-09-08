@@ -131,6 +131,15 @@
                             </li>
                         </ul>
                     </div>
+                    <div ng-show="methods" style="padding-left: 30px; float: left">
+                        <h4>Methods</h4>
+                        <ul>
+                            <li ng-repeat="method in methods">
+                                <a ng-click="method.display = !method.display">[[method.name]]</a>
+                                <br><small ng-show="method.display">[[method.code]]</small>
+                            </li>
+                        </ul>
+                    </div>
                     <div ng-show="functions" style="padding-left: 30px; float: left">
                         <h4>Functions</h4>
                         <ul>
