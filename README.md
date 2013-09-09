@@ -15,3 +15,5 @@ SimpleLookup
 
 * Set up Databases
   + Execute `python parser.py [number]`
+
+not done yet...
