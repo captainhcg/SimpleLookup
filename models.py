@@ -40,7 +40,7 @@ class Module(Base):
         return {
             "id": self.id,
             "name": self.name,
-            "label": "%s"%self.name,
+            "label": "%s.py"%self.name,
             "desc": self.description,
             "type": "module",
             "lines": self.lines,

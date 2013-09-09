@@ -128,7 +128,16 @@
                 </div>
             </div>
             <div id="main">
-                <div class="pull-left" style="width: 70%">        
+                <div class="pull-left" style="width: 70%">
+                    <div ng-show="path" style="margin-left: 20px; margin-bottom: 10px; font-weight: bold">
+                        <span ng-show="path.path" ng-bind="path.path"></span>
+                        <span ng-show="path.path">/</span>
+                        <a ng-show="path.module" ng-bind="path.module"></a>
+                        <span ng-show="path.class">/</span>
+                        <a ng-show="path.class" ng-bind="path.class"></a>
+                        <span ng-show="path.function">.</span>
+                        <a ng-show="path.function" ng-bind="path.function"></a>
+                    </div>        
                     <div ng-show="code">
                         <pre class="prettyprint linenums lang-py" id="id_source_code" ng-bind="code">
                         </pre>

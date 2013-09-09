@@ -160,6 +160,7 @@
             $scope.functions = []
             $scope.classes = []
             $scope.code = ""
+            $scope.path = {}
         }
 
         $scope.searchRecord = function(obj){
@@ -187,6 +188,7 @@
                     $scope.methods = response.methods || []
                     $scope.classes = response.classes || []
                     formatCode();
+                    makePath($scope.result);
                 },
                 function(){
                     $scope.loading = false;
@@ -195,6 +197,25 @@
             )
         }
 
+        var makePath = function(obj){
+            $scope.path = {}
+            if(obj.type == "module"){
+                $scope.path.path = obj.path;
+                $scope.path.module = obj.label;
+            }
+            else if(obj.type == "class"){
+                $scope.path.path = obj.module_path;
+                $scope.path.module = obj.module_name;
+                $scope.path.class = obj.label;
+            }
+            else if(obj.type == "function" || obj.type == "method"){
+                $scope.path.path = obj.module_path;
+                $scope.path.module = obj.module_name;
+                $scope.path.class = obj.class_name;
+                $scope.path.function = obj.label;
+            }
+            $scope.project_id = obj.project_id
+        }
         var formatCode = function(){
             $window.jQuery("#id_source_code").removeClass("prettyprinted")
             $window.setTimeout($window.prettyPrint, 101);
