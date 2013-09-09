@@ -116,8 +116,8 @@
             </div>
             <div id="main">
                 <div class="pull-left" style="width: 70%">        
-                    <div ng-show="result.code">
-                        <pre class="prettyprint linenums lang-py" id="id_source_code" ng-bind="result.code">
+                    <div ng-show="code">
+                        <pre class="prettyprint linenums lang-py" id="id_source_code" ng-bind="code">
                         </pre>
                     </div>
                 </div>
@@ -127,7 +127,7 @@
                         <ul>
                             <li ng-repeat="attr in attrs">
                                 <a ng-click="attr.display = !attr.display">[[attr.name]]</a>
-                                <br><small ng-show="attr.display">[[attr.code]]</small>
+                                <br><small ng-show="attr.display">[[attr.value]]</small>
                             </li>
                         </ul>
                     </div>
@@ -135,8 +135,7 @@
                         <h4>Methods</h4>
                         <ul>
                             <li ng-repeat="method in methods">
-                                <a ng-click="method.display = !method.display">[[method.name]]</a>
-                                <br><small ng-show="method.display">[[method.code]]</small>
+                                <a ng-click="searchRecord(method)">[[method.name]]</a>
                             </li>
                         </ul>
                     </div>

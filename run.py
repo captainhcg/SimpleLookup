@@ -46,33 +46,60 @@ def searchFunction(query):
     record_id = query.get('id')
     fun = g.session.query(Function).get(record_id)
     data = fun.as_dict()
-    return jsonify({"result": data})
+    methods = []
+    functions = []
+    attrs = []
+    if fun.class_id:
+        cls = fun.cls
+        for attr in cls.attributes:
+            attrs.append(attr.as_dict())
+        methods = []
+        for method in cls.methods:
+            methods.append(method.as_dict(code=False))
+    else:
+        module = fun.module
+        for fun in g.session.query(Function).filter(Function.module_id==module.id, Function.class_id==None):
+            functions.append(fun.as_dict(code=False))
+    for li in (attrs, functions, methods):
+        for item in li:
+            item['project_id'] = g.project_id
+    return jsonify({"record": data, "code": fun.code, "attrs": attrs, "functions": functions, "methods": methods})
 
 def searchClass(query):
     record_id = query.get('id')
     cls = g.session.query(Class).get(record_id)
-    data = cls.as_dict()
+    data = cls.as_dict(code=False)
     attrs = []
     for attr in cls.attributes:
         attrs.append(attr.as_dict())
     methods = []
     for method in cls.methods:
-        methods.append(method.as_dict())
-    return jsonify({"result": data, "attrs": attrs, "methods": methods})
+        methods.append(method.as_dict(code=False))
+    for li in (attrs, methods):
+        for item in li:
+            item['project_id'] = g.project_id
+    return jsonify({"record": data, "code": cls.code, "attrs": attrs, "methods": methods})
 
 def searchModule(query):
     record_id = query.get('id')
     module = g.session.query(Module).get(record_id)
-    print module.as_dict()
-    data = module.as_dict()
+    data = module.as_dict(code=False)
     classes = []
     for cls in module.classes:
-        classes.append(cls.as_dict())
+        if not cls.parent_class_id:
+            classes.append(cls.as_dict())
 
     functions = []
-    for fun in session.query(Function).filter(Function.module_id==record_id, Function.class_id==None):
-        print fun
-    return jsonify({"result": data, "classes": classes, "functions": functions})
+    for fun in g.session.query(Function).filter(Function.module_id==record_id, Function.class_id==None):
+        functions.append(fun.as_dict())
+
+    code = module.code
+    if module.lines > 5000:
+        code = "\n".join(module.code.split("\n")[:5001])
+    for li in (classes, functions):
+        for item in li:
+            item['project_id'] = g.project_id
+    return jsonify({"record": data, "code": code, "classes": classes, "functions": functions})
 
 @app.route('/list')
 @init_global
@@ -96,21 +123,18 @@ def list(**kwargs):
         moduldes = g.session.query(Module).filter(Module.name.like("%%%s%%"%keyword))[0:100]
         for m in moduldes:
             d = m.as_dict();
-            d['label'] = m.name
             result.append(d)
 
     if search_class:
         classes = g.session.query(Class).options(joinedload('module')).filter(Class.name.like("%%%s%%"%keyword))[0:100]
         for c in classes:
             d = c.as_dict(code=False)
-            d['label'] = "class %s"%c.name
             result.append(d)
 
     if search_function:
         functions = g.session.query(Function).options(joinedload('module'), joinedload('cls')).filter(Function.name.like("%%%s%%"%keyword))[0:100]
         for f in functions:
             d = f.as_dict(code=False)
-            d['label'] = "%s()"%f.name
             result.append(d)
 
     for r in result:

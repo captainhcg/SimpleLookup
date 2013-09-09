@@ -1,4 +1,9 @@
+import sys, os
+
 FILE_EXTENSION = ".py"
+
+DB_ENGINE = "sqlite"
+DB_PATH = os.path.dirname(__file__)+"/databases/"
 
 PROJECTS = [
     {
@@ -18,3 +23,8 @@ PROJECTS = [
     },
 
 ]
+
+for p in PROJECTS:
+    p['DB_URL'] = DB_ENGINE + ":///" + DB_PATH + p['DB_NAME']
+
+SQLALCHEMY_ECHO = True

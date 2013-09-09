@@ -134,34 +134,33 @@
             $scope.attrs = []
             $scope.functions = []
             $scope.classes = []
+            $scope.code = ""
         }
 
         $scope.searchRecord = function(obj){
             pushResult(obj);
-            var request = obj
+            var request = {'id': obj.id, 'type': obj.type, 'project_id': obj.project_id};
             $scope.resetView();
             $scope.request_id += 1;
             if("project_id" in obj)
                 $scope.info.project_id = obj.project_id;
             var this_request_id = $scope.request_id;
-            $scope.resource.search(obj).$then(
+            $scope.resource.search(request).$then(
                 function(data){
                     if(this_request_id != $scope.request_id)
                         return false;
                     $window.scrollTo(0, 0);
-                    console.log(data.data)
                     var response = data.data;
-                    $scope.result = response.result;
+                    $scope.result = response.record;
+                    $scope.code = response.code;
                     $scope.attrs = response.attrs || [];
                     $scope.functions = response.functions || []
                     $scope.methods = response.methods || []
                     $scope.classes = response.classes || []
-                    if(!$scope.result.lines || $scope.result.lines < 1000){ 
-                        window.setTimeout(function(){
-                            $window.jQuery("#id_source_code").removeClass("prettyprinted")
-                            $window.prettyPrint()
-                        }, 10);
-                    }
+                    window.setTimeout(function(){
+                        $window.jQuery("#id_source_code").removeClass("prettyprinted")
+                        $window.prettyPrint()
+                    }, 10);
                 },
                 function(){
                     $scope.loading = false;

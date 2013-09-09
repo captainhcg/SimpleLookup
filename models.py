@@ -21,7 +21,7 @@ class Module(Base):
     name = Column(String(64))
     path = Column(Text)
     code = deferred(Column(Text))
-    lines = 0
+    lines = Column(Integer)
 
     classes = relationship("Class", backref="module")
     functions = relationship("Function", backref="module")
@@ -40,6 +40,7 @@ class Module(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "label": "%s"%self.name,
             "desc": self.description,
             "type": "module",
             "lines": self.lines,
@@ -91,6 +92,7 @@ class Class(Base):
         return {
             "id": self.id, 
             "name": self.name,
+            "label": "class %s"%self.name,
             "desc": self.description,
             "type": "class",
             "code": self.code if code else "",
@@ -141,6 +143,7 @@ class Function(Base):
         return {
             "id": self.id, 
             "name": self.name,
+            "label": "%s()"%self.name,
             "desc": self.description,
             "type": "function" if not self.class_id else "method",
             "code": self.code if code else "",
@@ -183,6 +186,8 @@ class Attribute(Base):
             "id": self.id, 
             "name": self.name,
             "code": self.code,
+            "label": self.name,
+            "value": self.code.split("=", 1)[-1].strip()
         }
 
     @staticmethod
