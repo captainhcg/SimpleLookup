@@ -1,12 +1,13 @@
+#!/usr/bin/env python
+
 from flask import Flask, render_template, request, jsonify, g
-from flask.ext.sqlalchemy import SQLAlchemy
 import Levenshtein
 import settings
 from functools import wraps
 import sqlite3
 import sys, os
-from models import Module, Class, Function, Attribute, session
-from models import setProject
+from models import Module, Class, Function, Attribute
+from models import setProject, getSession
 from sqlalchemy.orm import joinedload
 
 app = Flask(__name__)
@@ -22,7 +23,7 @@ def init_global(function):
         except:
             g.project_id = 0
         setProject(g.project_id)
-        db_name = settings.PROJECTS[g.project_id]["DB_NAME"]
+        g.session = getSession(g.project_id)
         return function(*args, **kwargs)
     return wrap
 
@@ -43,13 +44,13 @@ def search():
 
 def searchFunction(query):
     record_id = query.get('id')
-    fun = session.query(Function).get(record_id)
+    fun = g.session.query(Function).get(record_id)
     data = fun.as_dict()
     return jsonify({"result": data})
 
 def searchClass(query):
     record_id = query.get('id')
-    cls = session.query(Class).get(record_id)
+    cls = g.session.query(Class).get(record_id)
     data = cls.as_dict()
     attrs = []
     for attr in cls.attributes:
@@ -61,7 +62,8 @@ def searchClass(query):
 
 def searchModule(query):
     record_id = query.get('id')
-    module = session.query(Module).get(record_id)
+    module = g.session.query(Module).get(record_id)
+    print module.as_dict()
     data = module.as_dict()
     classes = []
     for cls in module.classes:
@@ -70,7 +72,6 @@ def searchModule(query):
     functions = []
     for fun in session.query(Function).filter(Function.module_id==record_id, Function.class_id==None):
         print fun
-    
     return jsonify({"result": data, "classes": classes, "functions": functions})
 
 @app.route('/list')
@@ -92,21 +93,21 @@ def list(**kwargs):
         search_module = search_class = False
 
     if search_module:
-        moduldes = session.query(Module).filter(Module.name.like("%%%s%%"%keyword))[0:100]
+        moduldes = g.session.query(Module).filter(Module.name.like("%%%s%%"%keyword))[0:100]
         for m in moduldes:
             d = m.as_dict();
             d['label'] = m.name
             result.append(d)
 
     if search_class:
-        classes = session.query(Class).options(joinedload('module')).filter(Class.name.like("%%%s%%"%keyword))[0:100]
+        classes = g.session.query(Class).options(joinedload('module')).filter(Class.name.like("%%%s%%"%keyword))[0:100]
         for c in classes:
             d = c.as_dict(code=False)
             d['label'] = "class %s"%c.name
             result.append(d)
 
     if search_function:
-        functions = session.query(Function).options(joinedload('module'), joinedload('cls')).filter(Function.name.like("%%%s%%"%keyword))[0:100]
+        functions = g.session.query(Function).options(joinedload('module'), joinedload('cls')).filter(Function.name.like("%%%s%%"%keyword))[0:100]
         for f in functions:
             d = f.as_dict(code=False)
             d['label'] = "%s()"%f.name

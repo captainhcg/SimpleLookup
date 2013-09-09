@@ -149,16 +149,19 @@
                     if(this_request_id != $scope.request_id)
                         return false;
                     $window.scrollTo(0, 0);
+                    console.log(data.data)
                     var response = data.data;
                     $scope.result = response.result;
                     $scope.attrs = response.attrs || [];
                     $scope.functions = response.functions || []
                     $scope.methods = response.methods || []
                     $scope.classes = response.classes || []
-                    window.setTimeout(function(){
-                        $window.jQuery("#id_source_code").removeClass("prettyprinted")
-                        $window.prettyPrint()
-                    }, 10);
+                    if(!$scope.result.lines || $scope.result.lines < 1000){ 
+                        window.setTimeout(function(){
+                            $window.jQuery("#id_source_code").removeClass("prettyprinted")
+                            $window.prettyPrint()
+                        }, 10);
+                    }
                 },
                 function(){
                     $scope.loading = false;

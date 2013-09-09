@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import settings
 import traceback
@@ -151,6 +153,14 @@ def main(argv=sys.argv):
                             except UnicodeDecodeError:
                                 source_code.append(line.decode('iso-8859-1'))
                     source_code_len = len(source_code)-1
+                    if source_code_len > 0:
+                        code = getSourceCode(1, source_code_len)
+                    else:
+                        code = ""
+                    module.code = code
+                    module.lines = source_code_len
+                    module.save()
+
                     with open(fullpath, "rb") as f:
                         parseModule(f.read(), module_id=module_id, depth=0)
                 except Exception as e:

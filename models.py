@@ -1,18 +1,27 @@
-from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
-from settings import PROJECTS, SQLALCHEMY_BINDS, SQLALCHEMY_DATABASE_URI, SQLALCHEMY_ECHO
-from sqlalchemy.orm import relationship, backref, deferred
+from settings import PROJECTS, SQLALCHEMY_ECHO
+from sqlalchemy import Table, Column, Integer, ForeignKey, String, Text
+from sqlalchemy import create_engine
+from sqlalchemy.orm import relationship, backref, deferred, create_session
+from sqlalchemy.ext.declarative import declarative_base
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-app.config['SQLALCHEMY_ECHO'] = SQLALCHEMY_ECHO
-db = SQLAlchemy(app)
-session = db.session
+sessions = []
+engines = []
+for idx, project in enumerate(PROJECTS):
+    engine = create_engine(PROJECTS[idx]['DB_URL'], echo=SQLALCHEMY_ECHO)
+    engines.append(engine)
+    sessions.append(create_session(bind=engine, autocommit=False))
 
-class Module(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
-    path = db.Column(db.Text)
+engine = engines[0]
+session = sessions[0]
+Base = declarative_base()
+
+class Module(Base):
+    __tablename__ = 'module'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64))
+    path = Column(Text)
+    code = deferred(Column(Text))
+    lines = 0
 
     classes = relationship("Class", backref="module")
     functions = relationship("Function", backref="module")
@@ -27,12 +36,14 @@ class Module(db.Model):
         session.add(self)
         session.commit()
 
-    def as_dict(self):
+    def as_dict(self, code=True):
         return {
             "id": self.id,
             "name": self.name,
             "desc": self.description,
             "type": "module",
+            "lines": self.lines,
+            "code": self.code if code else ""
         }
 
     @property
@@ -46,12 +57,13 @@ class Module(db.Model):
         m.save()
         return m
 
-class Class(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
-    code = deferred(db.Column(db.Text))
-    module_id = db.Column(db.Integer, db.ForeignKey('module.id'))
-    parent_class_id = db.Column(db.Integer, db.ForeignKey('class.id'), nullable=True)
+class Class(Base):
+    __tablename__ = 'class'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64))
+    code = deferred(Column(Text))
+    module_id = Column(Integer, ForeignKey('module.id'))
+    parent_class_id = Column(Integer, ForeignKey('class.id'), nullable=True)
 
     sub_class = relationship("Class", backref="parent_class", remote_side=[id])
     methods = relationship("Function", backref="cls")
@@ -99,13 +111,14 @@ class Class(db.Model):
         c.save()
         return c
 
-class Function(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
-    code = deferred(db.Column(db.Text))
-    module_id = db.Column(db.Integer, db.ForeignKey('module.id'))
-    class_id = db.Column(db.Integer, db.ForeignKey('class.id'), nullable=True)
-    parent_function_id = db.Column(db.Integer, db.ForeignKey('function.id'), nullable=True)
+class Function(Base):
+    __tablename__ = 'function'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64))
+    code = deferred(Column(Text))
+    module_id = Column(Integer, ForeignKey('module.id'))
+    class_id = Column(Integer, ForeignKey('class.id'), nullable=True)
+    parent_function_id = Column(Integer, ForeignKey('function.id'), nullable=True)
 
     def __init__(self, name):
         self.name = name
@@ -147,12 +160,13 @@ class Function(db.Model):
         f.save()
         return f
 
-class Attribute(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
-    code = db.Column(db.Text)
-    module_id = db.Column(db.Integer, db.ForeignKey('module.id'))
-    class_id = db.Column(db.Integer, db.ForeignKey('class.id'))
+class Attribute(Base):
+    __tablename__ = 'attribute'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64))
+    code = Column(Text)
+    module_id = Column(Integer, ForeignKey('module.id'))
+    class_id = Column(Integer, ForeignKey('class.id'))
 
     def __init__(self, name):
         self.name = name
@@ -180,11 +194,16 @@ class Attribute(db.Model):
         return a
 
 def setProject(project_id=0):
-    app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_BINDS[str(project_id)]
+    global session, engine
+    engine = engines[project_id]
+    session = sessions[project_id]
+
+def getSession(project_id=0):
+    return sessions[project_id]
 
 def resetDB():
-    db.drop_all()
-    db.create_all()
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
 
 if __name__ == '__main__':
     pass

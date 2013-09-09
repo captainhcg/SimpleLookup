@@ -106,7 +106,7 @@
                             <button class="btn btn-default" type="button" ng-click="clearHistory()"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
                         </span>
                     </div>
-                    <ul style="padding-left: 0; margin-top: 10px">
+                    <ul style="padding-left: 0; margin-top: 10px" ng-show="result_history">
                         <li class="record_li" ng-repeat="r in result_history" ng-click="searchRecord(r)">
                             <a>[[r.label]]</a><br>
                             <small>[[r.desc]]</small>
