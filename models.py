@@ -44,6 +44,7 @@ class Module(Base):
             "desc": self.description,
             "type": "module",
             "lines": self.lines,
+            "path": self.path,
             "code": self.code if code else ""
         }
 

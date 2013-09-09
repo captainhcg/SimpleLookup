@@ -35,14 +35,15 @@
 
     .service(
         'notifyService', function(){
-            $("#notify_container").notify();
+            jQuery(document).ready(function(){
+                $("#notify_container").notify();
+            })
             this.notify = function(title, text, expire){
-                console.log("asd")
-                $("#notify_container").notify("create", {
-                    title: title,
-                    text: text,
+                jQuery("#notify_container").notify("create", {
+                    title: title || "",
+                    text: text || "",
                     },{
-                        expires: expire || 3000,
+                        expires: expire || 1000,
                         speed: 1000
                     }
                 );
@@ -77,7 +78,7 @@
             }
         }]
     )
-    .directive('simpleSearch', ["$parse", function($parse) {
+    .directive('simpleSearch', ["$parse", "notifyService", function($parse, notifyService) {
         return function(scope, element, attrs) {
             var ngModel = $parse(attrs.ngModel);
             element.autocomplete({
@@ -87,10 +88,17 @@
                         dataType: "json",
                         data: {
                             term: request.term,
-                            project_id: $("#project_id").val(),
+                            project_id: jQuery("#project_id").val(),
                         },
                         success: function(data) {
                             response(data.data);
+                            console.log(data.data)
+                            if(data.data.length === 0){
+                                notifyService.notify("No Result Found...")
+                            }
+                        },
+                        error: function(data){
+                            notifyService.notify("Something is wrong...")
                         }
                     });
                 },
@@ -155,17 +163,20 @@
         }
 
         $scope.searchRecord = function(obj){
+            notifyService.notify("Loading...");
             pushResult(obj);
             var request = {'id': obj.id, 'type': obj.type, 'project_id': obj.project_id};
             $scope.resetView();
             $scope.request_id += 1;
             if("project_id" in obj)
                 $scope.info.project_id = obj.project_id;
-            var this_request_id = $scope.request_id;
-            notifyService.notify("searching")
-            $scope.resource.search(request).$then(
+            search(request, $scope.request_id)
+        }
+
+        var search = function(request, request_id){
+           $scope.resource.search(request).$then(
                 function(data){
-                    if(this_request_id != $scope.request_id)
+                    if(request_id != $scope.request_id)
                         return false;
                     $window.scrollTo(0, 0);
                     var response = data.data;
@@ -175,15 +186,18 @@
                     $scope.functions = response.functions || []
                     $scope.methods = response.methods || []
                     $scope.classes = response.classes || []
-                    window.setTimeout(function(){
-                        $window.jQuery("#id_source_code").removeClass("prettyprinted")
-                        $window.prettyPrint()
-                    }, 10);
+                    formatCode();
                 },
                 function(){
                     $scope.loading = false;
+                    notifyService.notify("Something is wrong...")
                 }            
             )
+        }
+
+        var formatCode = function(){
+            $window.jQuery("#id_source_code").removeClass("prettyprinted")
+            $window.setTimeout($window.prettyPrint, 101);
         }
 
         var saveHistory = function(){
