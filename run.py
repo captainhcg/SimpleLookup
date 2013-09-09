@@ -45,6 +45,7 @@ def search():
 def searchFunction(query):
     record_id = query.get('id')
     fun = g.session.query(Function).get(record_id)
+    code = fun.code
     data = fun.as_dict()
     methods = []
     functions = []
@@ -63,7 +64,7 @@ def searchFunction(query):
     for li in (attrs, functions, methods):
         for item in li:
             item['project_id'] = g.project_id
-    return jsonify({"record": data, "code": fun.code, "attrs": attrs, "functions": functions, "methods": methods})
+    return jsonify({"record": data, "code": code, "attrs": attrs, "functions": functions, "methods": methods})
 
 def searchClass(query):
     record_id = query.get('id')
