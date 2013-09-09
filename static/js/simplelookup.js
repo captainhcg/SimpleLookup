@@ -34,6 +34,23 @@
     })
 
     .service(
+        'notifyService', function(){
+            $("#notify_container").notify();
+            this.notify = function(title, text, expire){
+                console.log("asd")
+                $("#notify_container").notify("create", {
+                    title: title,
+                    text: text,
+                    },{
+                        expires: expire || 3000,
+                        speed: 1000
+                    }
+                );
+            }
+        }
+    )
+
+    .service(
         'localStorageService', ['$window', function($window){   
             var supports_html5_storage = function (){
             try {
@@ -110,7 +127,7 @@
         }
     ])
 
-    .controller("searchController", ["$scope", "search_resources", "$window", "localStorageService", function($scope, search_resources, $window, localStorageService){
+    .controller("searchController", ["$scope", "search_resources", "$window", "localStorageService", "notifyService", function($scope, search_resources, $window, localStorageService, notifyService){
         $scope.request_id = 1;
 
         $scope.init = function(){
@@ -145,6 +162,7 @@
             if("project_id" in obj)
                 $scope.info.project_id = obj.project_id;
             var this_request_id = $scope.request_id;
+            notifyService.notify("searching")
             $scope.resource.search(request).$then(
                 function(data){
                     if(this_request_id != $scope.request_id)
