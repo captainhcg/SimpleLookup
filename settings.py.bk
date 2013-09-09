@@ -7,17 +7,17 @@ DB_PATH = os.path.dirname(__file__)+"/databases/"
 
 PROJECTS = [
     {
-        "NAME": "Django", 
+        "NAME": "Django 1.5.1", 
         "DB_NAME": "DJANGO",
         "PROJECT_PATH": "/usr/lib/python2.6/site-packages/django/"
     },
     {
-        "NAME": "Flask",
+        "NAME": "Flask 0.10.1",
         "DB_NAME": "FLASK",
         "PROJECT_PATH": "/usr/lib/python2.6/site-packages/flask/"
     },  
     {
-        "NAME": "Gevent",
+        "NAME": "Gevent 0.13.8",
         "DB_NAME": "GEVENT",
         "PROJECT_PATH": "/usr/lib/python2.6/site-packages/gevent/"
     },
@@ -27,4 +27,4 @@ PROJECTS = [
 for p in PROJECTS:
     p['DB_URL'] = DB_ENGINE + ":///" + DB_PATH + p['DB_NAME']
 
-SQLALCHEMY_ECHO = True
+SQLALCHEMY_ECHO = False
