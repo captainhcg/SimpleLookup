@@ -96,7 +96,7 @@
                 color: #999;
             }
             .highlight pre{
-                
+
             }
             .ui-notify { width:350px; position:fixed; top:60px; right:10px; z-index:9999;}
             .ui-notify-message { padding:10px; margin-bottom:15px; -moz-border-radius:8px; -webkit-border-radius:8px; border-radius:8px }
@@ -220,7 +220,7 @@
                         <span ng-show="path.path" ng-bind="path.path"></span>
                         <span ng-show="path.path">/</span>
                         <a ng-if="path.module" ng-bind="path.module" ng-click="searchRecord({project_id: [[path.project_id]], id: [[path.module_id]], type: 'module'})"></a>
-                        <span ng-show="path.class">/</span>
+                        <span ng-show="path.class">.</span>
                         <a ng-if="path.class" ng-bind="path.class" ng-click="searchRecord({project_id: [[path.project_id]], id: [[path.class_id]], type: 'class'})"></a>
                         <span ng-show="path.function">.</span>
                         <a ng-if="path.function" ng-bind="path.function"></a>
