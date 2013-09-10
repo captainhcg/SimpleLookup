@@ -17,4 +17,9 @@ SimpleLookup
 * Set up Databases
   + Execute `python parser.p --project=[project id]` or  `python parser.p --all` to parse project(s). If no argument is provided, the first project would be parsed.
 
+### Run Server
+
+* Just `python run.py` under project path. By default it uses 5000 port. 
+* Take a look at [Simple Lookup](http://127.0.0.1:5000)
+* 
 not done yet...
