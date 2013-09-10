@@ -1,4 +1,4 @@
-(function(){
+(function(jQuery){
     var app = angular.module('simplelookup', ['ngResource'])
 
     .config(['$interpolateProvider', function($interpolateProvider) {
@@ -30,14 +30,14 @@
                 actionController: "@actionController",
                 typeController: "@typeController"
             }
-        }
+        };
     })
 
     .service(
         'notifyService', function(){
             jQuery(document).ready(function(){
                 $("#notify_container").notify();
-            })
+            });
             this.notify = function(title, text, expire){
                 jQuery("#notify_container").notify("create", {
                     title: title || "",
@@ -47,12 +47,12 @@
                         speed: 1000
                     }
                 );
-            }
+            };
         }
     )
 
     .service(
-        'localStorageService', ['$window', function($window){   
+        'localStorageService', ['$window', function($window){
             var supports_html5_storage = function (){
             try {
                     if('localStorage' in $window && $window['localStorage'] !== null){
@@ -63,19 +63,19 @@
                     }
                 } catch (e) {
                     return false;
-                }            
-            }
+                }
+            };
             this._supports_html5_storage = supports_html5_storage();
             this.get = function(key){
                 if(this._supports_html5_storage){
                     return $window.localStorage.getItem(key, true);
                 }
-            }
+            };
             this.set = function(key, value){
                 if(this._supports_html5_storage){
                     $window.localStorage.setItem(key, value);
                 }
-            }
+            };
         }]
     )
     .directive('simpleSearch', ["$parse", "notifyService", function($parse, notifyService) {
@@ -92,13 +92,12 @@
                         },
                         success: function(data) {
                             response(data.data);
-                            console.log(data.data)
                             if(data.data.length === 0){
-                                notifyService.notify("No Result Found...")
+                                notifyService.notify("No Result Found...");
                             }
                         },
                         error: function(data){
-                            notifyService.notify("Something is wrong...")
+                            notifyService.notify("Something is wrong...");
                         }
                     });
                 },
@@ -113,7 +112,7 @@
                             scope.$apply(function(scope){
                                 data.item.toString = function(){
                                     return data.item.name;
-                                }
+                                };
                                 ngModel.assign(scope, data.item);
                             });
                         }
@@ -124,7 +123,7 @@
                     .append( "<a>"+item.label+"<br><small style='color: blue'>"+item.desc+"</small></a>" )
                     .appendTo( ul );
                 };
-            }
+            };
     }])
 
     // resources
@@ -142,26 +141,26 @@
             $scope.resource = search_resources.lookUpResource;
             $scope.info = {
                 project_id: 0,
-            }
+            };
             $scope.localStorageService = localStorageService;
-            $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history")) || []
+            $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history")) || [];
             $scope.info.project_id = $scope.localStorageService.get("project_id") || 0;
-        }
+        };
 
         $scope.clearHistory = function(){
             $scope.record = null;
             $scope.result_history = [];
             saveHistory();
-        }
+        };
 
         $scope.resetView = function(){
-            $scope.result = {}
-            $scope.attrs = []
-            $scope.functions = []
-            $scope.classes = []
-            $scope.code = ""
-            $scope.path = {}
-        }
+            $scope.result = {};
+            $scope.attrs = [];
+            $scope.functions = [];
+            $scope.classes = [];
+            $scope.code = "";
+            $scope.path = {};
+        };
 
         $scope.searchRecord = function(obj){
             // notifyService.notify("Loading...");
@@ -172,8 +171,8 @@
             $scope.request_id += 1;
             if("project_id" in obj)
                 $scope.info.project_id = obj.project_id;
-            search(request, $scope.request_id)
-        }
+            search(request, $scope.request_id);
+        };
 
         var search = function(request, request_id){
            $scope.resource.search(request).$then(
@@ -186,20 +185,20 @@
                     $scope.result.project_id = request.project_id;
                     $scope.code = response.code;
                     $scope.attrs = response.attrs || [];
-                    $scope.functions = response.functions || []
-                    $scope.methods = response.methods || []
-                    $scope.classes = response.classes || []
+                    $scope.functions = response.functions || [];
+                    $scope.methods = response.methods || [];
+                    $scope.classes = response.classes || [];
                     makePath($scope.result);
                 },
                 function(){
                     $scope.loading = false;
-                    notifyService.notify("Something is wrong...")
-                }            
-            )
-        }
+                    notifyService.notify("Something is wrong...");
+                }
+            );
+        };
 
         var makePath = function(obj){
-            $scope.path = {}
+            $scope.path = {};
             if(obj.type == "module"){
                 $scope.path.path = obj.path;
                 $scope.path.module = obj.label;
@@ -221,9 +220,8 @@
                 $scope.path.function = obj.label;
                 $scope.path.function_id = obj.id;
             }
-            $scope.path.project_id = obj.project_id
-            console.log(obj)
-        }
+            $scope.path.project_id = obj.project_id;
+        };
 
         var saveHistory = function(){
             $scope.localStorageService.set('history', $window.JSON.stringify($scope.result_history, function (key, val) {
@@ -233,7 +231,7 @@
                     return val;
                 })
             );
-        }
+        };
 
         var pushResult = function(obj){
             var index = -1;
@@ -245,23 +243,23 @@
             }
             $scope.result_history.splice(0, 0, obj);
             if($scope.result_history.length > 15)
-                $scope.result_history.pop()
+                $scope.result_history.pop();
             saveHistory();
-        }
+        };
 
-        $scope.result_history = []
+        $scope.result_history = [];
 
         $scope.$watch("record", function(nv){
             if(nv && typeof nv === "object"){
                 $scope.searchRecord(nv);
             }
-        })
+        });
     }])
 
     .controller("navbarController", ["$scope", "$window", function($scope, $window){
         $scope.changeProject = function(project_id){
             $scope.info.project_id = project_id;
             $scope.localStorageService.set("project_id", project_id);
-        }
-    }])
-}())
+        };
+    }]);
+}(jQuery));

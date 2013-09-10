@@ -1,4 +1,4 @@
-import sys, os
+import os
 
 FILE_EXTENSION = ".py"
 
@@ -7,21 +7,20 @@ DB_PATH = os.path.dirname(__file__)+"/databases/"
 
 PROJECTS = [
     {
-        "NAME": "Django 1.5.1", 
-        "DB_NAME": "DJANGO",
-        "PROJECT_PATH": "/usr/lib/python2.6/site-packages/django/"
+        "NAME": "Simple Lookup", 
+        "DB_NAME": "SIMPLELOOKUP.db",
+        "PROJECT_PATH": "."
     },
-    {
-        "NAME": "Flask 0.10.1",
-        "DB_NAME": "FLASK",
-        "PROJECT_PATH": "/usr/lib/python2.6/site-packages/flask/"
-    },  
-    {
-        "NAME": "Gevent 0.13.8",
-        "DB_NAME": "GEVENT",
-        "PROJECT_PATH": "/usr/lib/python2.6/site-packages/gevent/"
-    },
-
+    # {
+    #     "NAME": "Flask 0.10.1",
+    #     "DB_NAME": "FLASK",
+    #     "PROJECT_PATH": "/usr/lib/python2.6/site-packages/flask/"
+    # },  
+    # {
+    #     "NAME": "Gevent 0.13.8",
+    #     "DB_NAME": "GEVENT",
+    #     "PROJECT_PATH": "/usr/lib/python2.6/site-packages/gevent/"
+    # },
 ]
 
 for p in PROJECTS:

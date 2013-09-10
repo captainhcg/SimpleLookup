@@ -3,9 +3,7 @@ from flask import Flask, render_template, request, jsonify, g
 import Levenshtein
 import settings
 from functools import wraps
-import sqlite3
-import sys, os
-from models import Module, Class, Function, Attribute
+from models import Module, Class, Function
 from models import setProject, getSession
 from sqlalchemy.orm import joinedload
 from pygments import highlight
