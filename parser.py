@@ -8,6 +8,8 @@ import ast
 import os, os.path
 from models import Module, Class, Function, Attribute
 from models import setProject, resetDB
+from optparse import OptionParser
+
 source_code = []
 lines_depth = []
 source_code_len = 0
@@ -108,20 +110,14 @@ def parseModule(source, module_id=None, depth=0):
     for item in tree.body:
         parseNode(item, module_id=module_id, depth=depth+1)
 
-def main(argv=sys.argv):
+def parseProject(project_id=0):
     global source_code, lines_depth, source_code_len
-    if len(argv)<2:
-        project_id = 0
-    else:
-        try:
-            project_id = int(argv[1])
-        except:
-            project_id = 0
     setProject(project_id)
     resetDB();
 
     project_settings = settings.PROJECTS[project_id]
     project_path = project_settings['PROJECT_PATH']
+    print "Parsing Project %s"%(project_settings['NAME'])
     folder_exclude_patterns = []
     if "FOLDER_EXCLUDE_PATTERNS" in project_settings:
         for pattern in project_settings['FOLDER_EXCLUDE_PATTERNS']:
@@ -171,4 +167,13 @@ def main(argv=sys.argv):
                     exit()
 
 if __name__ == "__main__":
-    main()
+    parser = OptionParser()
+    parser.add_option("-a", "--all", action="store_true", default=False)
+    parser.add_option("-p", "--project", default=0, type="int")
+    options, _ = parser.parse_args()
+
+    if options.all:
+        for idx in xrange(len(settings.PROJECTS)):
+            parseProject(idx)
+    else:
+        parseProject(options.project)
