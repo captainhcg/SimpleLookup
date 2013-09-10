@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-
 from flask import Flask, render_template, request, jsonify, g
-from flask.ext.sqlalchemy import SQLAlchemy
 import Levenshtein
 import settings
 from functools import wraps

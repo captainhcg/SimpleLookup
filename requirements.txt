@@ -3,4 +3,3 @@ pygments
 pygments-style-github
 sqlalchemy
 flask
-flask-sqlalchemy 
