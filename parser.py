@@ -22,8 +22,13 @@ def parseNode(item, module_id=None, class_id=None, function_id=None, depth=0):
 
 def markLineDepth(item, depth):
     global lines_depth
-    for node in item.body:
-        lines_depth[node.lineno] = depth+1
+    if hasattr(item, "lineno"):
+        lines_depth[item.lineno] = depth
+    if hasattr(item, "body"):
+        if not isinstance(item.body, list):
+            item.body = [item.body]
+        for node in item.body:
+            lines_depth[node.lineno] = depth+1
 
 def getLastLine(line_num, depth):
     global source_code_len
@@ -44,10 +49,10 @@ def getSourceCode(start_line, end_line):
 
 def parseOther(item, module_id=None, class_id=None, function_id=None, depth=0):
     lastLine = item.lineno
+    markLineDepth(item, depth)
     if hasattr(item, "body"):
         if not isinstance(item.body, list):
             item.body = [item.body]
-        markLineDepth(item, depth+1)
         for node in item.body:
             lastLine = parseNode(node, module_id, class_id, function_id, depth+1)
     return lastLine
@@ -55,8 +60,7 @@ def parseOther(item, module_id=None, class_id=None, function_id=None, depth=0):
 def parseFunction(item, module_id=None, class_id=None, function_id=None, depth=0):
     fun = Function.addFunction(name=item.name, module_id=module_id, class_id=class_id, function_id=function_id)
     function_id = fun.id
-    start_line = item.lineno
-    end_line = item.lineno
+    start_line = end_line = item.lineno
     markLineDepth(item, depth)
     for node in item.body:
         end_line = parseNode(node, module_id, class_id, function_id, depth+1)
@@ -70,8 +74,7 @@ def parseClass(item, module_id=None, class_id=None, function_id=None, depth=0):
     global source_code
     cls = Class.addClass(name=item.name, module_id=module_id, class_id=class_id)
     class_id = cls.id
-    start_line = item.lineno
-    end_line = item.lineno
+    start_line = end_line = item.lineno
     markLineDepth(item, depth)
     for node in item.body:
         end_line = parseNode(node, module_id, class_id, function_id, depth+1)
