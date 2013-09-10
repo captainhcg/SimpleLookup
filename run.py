@@ -9,6 +9,9 @@ import sys, os
 from models import Module, Class, Function, Attribute
 from models import setProject, getSession
 from sqlalchemy.orm import joinedload
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
 
 app = Flask(__name__)
 projects=settings.PROJECTS
@@ -45,7 +48,7 @@ def search():
 def searchFunction(query):
     record_id = query.get('id')
     fun = g.session.query(Function).get(record_id)
-    code = fun.code
+    code = highlight(fun.code, PythonLexer(), HtmlFormatter(style='github', linenos='table'))
     data = fun.as_dict()
     methods = []
     functions = []
@@ -69,6 +72,7 @@ def searchFunction(query):
 def searchClass(query):
     record_id = query.get('id')
     cls = g.session.query(Class).get(record_id)
+    code = highlight(cls.code, PythonLexer(), HtmlFormatter(style='github', linenos='table'))
     data = cls.as_dict(code=False)
     attrs = []
     for attr in cls.attributes:
@@ -79,7 +83,7 @@ def searchClass(query):
     for li in (attrs, methods):
         for item in li:
             item['project_id'] = g.project_id
-    return jsonify({"record": data, "code": cls.code, "attrs": attrs, "methods": methods})
+    return jsonify({"record": data, "code": code, "attrs": attrs, "methods": methods})
 
 def searchModule(query):
     record_id = query.get('id')
@@ -94,9 +98,9 @@ def searchModule(query):
     for fun in g.session.query(Function).filter(Function.module_id==record_id, Function.class_id==None):
         functions.append(fun.as_dict())
 
-    code = module.code
     if module.lines > 5000:
         code = "\n".join(module.code.split("\n")[:5001])
+    code = highlight(module.code, PythonLexer(), HtmlFormatter(style='github', linenos='table'))
     for li in (classes, functions):
         for item in li:
             item['project_id'] = g.project_id

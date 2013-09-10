@@ -164,7 +164,7 @@
         }
 
         $scope.searchRecord = function(obj){
-            notifyService.notify("Loading...");
+            // notifyService.notify("Loading...");
             if(obj.label)
                 pushResult(obj);
             var request = {'id': obj.id, 'type': obj.type, 'project_id': obj.project_id};
@@ -189,7 +189,6 @@
                     $scope.functions = response.functions || []
                     $scope.methods = response.methods || []
                     $scope.classes = response.classes || []
-                    formatCode();
                     makePath($scope.result);
                 },
                 function(){
@@ -224,10 +223,6 @@
             }
             $scope.path.project_id = obj.project_id
             console.log(obj)
-        }
-        var formatCode = function(){
-            $window.jQuery("#id_source_code").removeClass("prettyprinted")
-            $window.setTimeout($window.prettyPrint, 101);
         }
 
         var saveHistory = function(){
