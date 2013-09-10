@@ -1,7 +1,7 @@
 from settings import PROJECTS, SQLALCHEMY_ECHO
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, Text
+from sqlalchemy import Column, Integer, ForeignKey, String, Text
 from sqlalchemy import create_engine
-from sqlalchemy.orm import relationship, backref, deferred, create_session
+from sqlalchemy.orm import relationship, deferred, create_session
 from sqlalchemy.ext.declarative import declarative_base
 
 sessions = []
@@ -76,14 +76,6 @@ class Class(Base):
 
     def __repr__(self):
         return '<Class %r>' % self.name
-
-    def as_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "desc": self.description,
-            "type": "class",
-        }
 
     def save(self):
         session.add(self)

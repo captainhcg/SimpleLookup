@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-
-import sys
 import settings
 import traceback
 import re
