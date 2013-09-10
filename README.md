@@ -11,10 +11,10 @@ SimpleLookup
   + pygments-style-github, [A port of the github color scheme for pygments](https://github.com/hugomaiavieira/pygments-style-github)
 
 * Set up settings.py: 
-  + Create setting file by renaming `settings.py.pk` to `settings.py`
+  + Create setting file by renaming `settings.py.pk` to `settings.py` and
   + Set the 'NAME', 'DB_NAME' and 'PROJECT_PATH' of your project. 'NAME' and 'DB_NAME' can be arbitary string, 'PROJECT_PATH' must point to a valid python code base. For example `/usr/lib/python2.6/site-packages/flask/` or `/Users/user_name/vitualenvs/drc/lib/python2.7/site-packages/django/`
 
 * Set up Databases
-  + Execute `python parser.py [number]`
+  + Execute `python parser.p --project=[project id]` or  `python parser.p --all` to parse project(s). If no argument is provided, the first project would be parsed.
 
 not done yet...
