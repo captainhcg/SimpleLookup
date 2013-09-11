@@ -202,6 +202,3 @@ def getSession(project_id=0):
 def resetDB():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
-
-if __name__ == '__main__':
-    pass

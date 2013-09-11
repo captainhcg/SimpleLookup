@@ -1,11 +1,14 @@
 #!/usr/bin/env python
+import sys
+sys.path.append("../")
+
 import settings
 import traceback
 import re
 import ast
 import os, os.path
-from models import Module, Class, Function, Attribute
-from models import setProject, resetDB
+from search_app.models import Module, Class, Function, Attribute
+from search_app.models import setProject, resetDB
 from optparse import OptionParser
 
 source_code = []
