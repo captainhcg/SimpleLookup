@@ -27,3 +27,7 @@ for p in PROJECTS:
     p['DB_URL'] = DB_ENGINE + ":///" + DB_PATH + p['DB_NAME']
 
 SQLALCHEMY_ECHO = False
+
+APP_PORT = 5000
+APP_HOST = "127.0.0.1"
+

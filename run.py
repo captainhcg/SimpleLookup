@@ -29,6 +29,7 @@ def init_global(function):
 
 @app.route('/')
 def index():
+    print "asd"
     return render_template('index.html', projects=projects)
 
 @app.route('/search')
@@ -147,6 +148,4 @@ def list(**kwargs):
     return jsonify({"data": result})
 
 if __name__ == '__main__':
-    app.debug = True
-    app.run()
-    # app.run(host="0.0.0.0")
+    app.run(host=settings.APP_HOST, port=settings.APP_PORT, debug=True)

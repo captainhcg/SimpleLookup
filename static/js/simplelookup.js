@@ -19,10 +19,6 @@
             action_map: {
                 list: {method:'GET', isArray: true, params: { actionController: "list" }},
                 search: {method:'GET', params: { actionController: "search" }},
-                info: {method:'GET', params: { actionController: "info" }},
-                export_csv: {method:'GET', params: { actionController: "export_csv" }},
-                export_custom: {method:'GET', params: { actionController: "export_custom" }},
-                export_html: {method:'GET', params: { actionController: "export_html" }},
             },
             // http://www.bennadel.com/blog/2433-Using-RESTful-Controllers-In-An-AngularJS-Resource.htm
             controller_map: {
@@ -54,7 +50,7 @@
     .service(
         'localStorageService', ['$window', function($window){
             var supports_html5_storage = function (){
-            try {
+                try {
                     if('localStorage' in $window && $window['localStorage'] !== null){
                         $window.localStorage.setItem('drchrono', true);
                         return true;
@@ -65,14 +61,15 @@
                     return false;
                 }
             };
-            this._supports_html5_storage = supports_html5_storage();
+            var _supports_html5_storage = supports_html5_storage();
             this.get = function(key){
-                if(this._supports_html5_storage){
+                if(_supports_html5_storage){
                     return $window.localStorage.getItem(key, true);
                 }
+                return null;
             };
             this.set = function(key, value){
-                if(this._supports_html5_storage){
+                if(_supports_html5_storage){
                     $window.localStorage.setItem(key, value);
                 }
             };
@@ -244,6 +241,7 @@
             $scope.result_history.splice(0, 0, obj);
             if($scope.result_history.length > 15)
                 $scope.result_history.pop();
+            console.log($scope.result_history);
             saveHistory();
         };
 
