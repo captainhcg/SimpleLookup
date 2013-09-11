@@ -98,7 +98,7 @@
                         }
                     });
                 },
-                minLength: 3,
+                minLength: 1,
                 focus: function(event, ui) {
                     event.preventDefault(); //Don't preopulate field
                 },
