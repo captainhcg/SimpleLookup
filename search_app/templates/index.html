@@ -43,7 +43,7 @@
                     <ul style="padding-left: 0; margin-top: 10px" ng-hide="!result_history">
                         <li class="record_li" ng-repeat="r in result_history" ng-click="searchRecord(r)">
                             <a ng-bind="r.label"></a><br>
-                            <small ng-bind="r.desc"></small>
+                            <span ng-bind="r.desc"></span>
                         </li>
                     </ul>
                 </div>
