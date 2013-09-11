@@ -20,7 +20,7 @@ SimpleLookup
   + `python parser.py --project=[project id]` or  `python parser.p --all` to parse project(s). If no argument is provided, the first project would be parsed.
 
 ### Run Server
-* `cd /path_to_simlelookup/scripts`
+* `cd /path_to_simlelookup`
 * `python run.py` to start the server. By default 5000 port will be used. 
 * Take a look at [Simple Lookup](http://127.0.0.1:5000)
 * 
