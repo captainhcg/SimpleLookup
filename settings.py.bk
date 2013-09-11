@@ -2,6 +2,7 @@ import os
 
 FILE_EXTENSION = ".py"
 
+PROJECT_PATH = os.path.dirname(__file__)
 DB_ENGINE = "sqlite"
 DB_PATH = os.path.dirname(__file__)+"/databases/"
 
@@ -9,7 +10,7 @@ PROJECTS = [
     {
         "NAME": "Simple Lookup", 
         "DB_NAME": "SIMPLELOOKUP.db",
-        "PROJECT_PATH": "."
+        "PROJECT_PATH": PROJECT_PATH
     },
     # {
     #     "NAME": "Flask 0.10.1",
