@@ -163,7 +163,7 @@ def parseProject(project_id=0):
 
                     with open(fullpath, "rb") as f:
                         parseModule(f.read(), module_id=module_id, depth=0)
-                except Exception as e:
+                except Exception:
                     traceback.print_exc()
                     exit()
 
