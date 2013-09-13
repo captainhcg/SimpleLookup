@@ -15,101 +15,126 @@ source_code = []
 lines_depth = []
 source_code_len = 0
 
-def parseNode(item, module_id=None, class_id=None, function_id=None, depth=0):
-    call = parseOther
-    if isinstance(item, ast.FunctionDef):
-        call = parseFunction
-    elif isinstance(item, ast.ClassDef):
-        call = parseClass
-    return call(item, module_id, class_id, function_id, depth+1)
+class NodeParser(ast.NodeVisitor):
+    source_code = []
+    source_code_len = 0
+    lines_depth = []
+    path = ""
+    name = ""
 
-def markLineDepth(item, depth):
-    global lines_depth
-    if hasattr(item, "lineno"):
-        lines_depth[item.lineno] = depth
-    if hasattr(item, "body"):
-        if not isinstance(item.body, list):
-            item.body = [item.body]
-        for node in item.body:
-            lines_depth[node.lineno] = depth+1
+    def __init__(self, code_list, name, path):
+        self.source_code = code_list
+        self.source_code_len = len(code_list)-1
+        self.lines_depth = [65535] * (self.source_code_len+1)
+        self.path = path
+        self.name = name
 
-def getLastLine(line_num, depth):
-    global source_code_len
-    for idx in xrange(line_num+1, source_code_len+1):
-        if lines_depth[idx] > depth:
-            line_num = idx
+    def addAttributes(self, node):
+        for node in node.body:
+            # process attributes
+            # TODO: I dont think my solution is proper
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Attribute):
+                        attr = Attribute.addAttribute(name=target.attr, module_id=node.module_id, class_id=node.class_id)
+                        attr.code = source_code[node.lineno]
+                        attr.save()
+                    elif isinstance(target, ast.Name):
+                        attr = Attribute.addAttribute(name=target.id, module_id=node.module_id, class_id=node.class_id)
+                        attr.code = source_code[node.lineno]
+                        attr.save()
+                    else:
+                        # I do not know how to handle these cases
+                        pass
+
+    def generic_visit(self, node, module_id=None, class_id=None, function_id=None):
+        self.markLineDepth(node)
+        depth = node.depth
+        for field, value in ast.iter_fields(node):
+            if isinstance(value, list):
+                for item in value:
+                    if self.continue_or_not(item, depth):
+                        item.depth = depth+1
+                        self.lines_depth[item.lineno] = item.depth
+                        item.module_id = node.module_id
+                        item.class_id = node.class_id
+                        item.function_id = node.function_id
+                        self.visit(item)
+            elif self.continue_or_not(value, depth):
+                value.depth = depth+1
+                self.lines_depth[value.lineno] = value.depth
+                value.module_id = node.module_id
+                value.class_id = node.class_id
+                value.function_id = node.function_id
+                self.visit(value)
+
+    def continue_or_not(self, x, depth):
+        if not isinstance(x, ast.AST):
+            return False
+        if not hasattr(x, "lineno"):
+            return False
+        existing_depth = self.lines_depth[x.lineno]
+        if existing_depth != 65535 and depth+1 < existing_depth:
+            return False
+        return True
+
+    def visit_Module(self, node):
+        module = Module.addModule(name=self.name, path=self.path)
+        node.module_id = module.id
+        if self.source_code_len > 0:
+            code = self.getSourceCode(1, self.source_code_len)
         else:
-            break
-    return line_num
+            code = ""
+        module.code = code
+        module.lines = self.source_code_len
+        module.save()
+        self.generic_visit(node)
 
-def getSourceCode(start_line, end_line):
-    global source_code
-    code = source_code[start_line: end_line+1]
-    # remove the blank lines at the end of section
-    while not code[-1].strip(" \r\n"):
-        code.pop()
-    return "".join(code)
+    def visit_ClassDef(self, node):
+        self.lines_depth[node.lineno] = node.depth
+        cls = Class.addClass(name=node.name, module_id=node.module_id, class_id=node.class_id)
+        node.class_id = cls.id
+        self.generic_visit(node)
+        lastLine = self.getLastLine(node.lineno, node.depth)
+        code = self.getSourceCode(node.lineno, lastLine)
+        cls.code = code
+        cls.save()
+        self.addAttributes(node)
 
-def parseOther(item, module_id=None, class_id=None, function_id=None, depth=0):
-    lastLine = item.lineno
-    markLineDepth(item, depth)
-    if hasattr(item, "body"):
-        if not isinstance(item.body, list):
-            item.body = [item.body]
-        for node in item.body:
-            lastLine = parseNode(node, module_id, class_id, function_id, depth+1)
-    return lastLine
+    def visit_FunctionDef(self, node):
+        self.lines_depth[node.lineno] = node.depth
+        fun = Function.addFunction(name=node.name, module_id=node.module_id, class_id=node.class_id, function_id=node.function_id)
+        node.function_id = fun.id
+        self.generic_visit(node)
+        lastLine = self.getLastLine(node.lineno, node.depth)
+        code = self.getSourceCode(node.lineno, lastLine)
+        fun.code = code
+        fun.save()
 
-def parseFunction(item, module_id=None, class_id=None, function_id=None, depth=0):
-    fun = Function.addFunction(name=item.name, module_id=module_id, class_id=class_id, function_id=function_id)
-    function_id = fun.id
-    start_line = end_line = item.lineno
-    markLineDepth(item, depth)
-    for node in item.body:
-        end_line = parseNode(node, module_id, class_id, function_id, depth+1)
-    end_line = getLastLine(end_line, depth)
-    code = getSourceCode(start_line, end_line)
-    fun.code = code
-    fun.save()
-    return end_line
+    def getSourceCode(self, start_line, end_line):
+        code = self.source_code[start_line: end_line+1]
+        # remove the blank lines at the end of section
+        while not code[-1].strip(" \r\n\t"):
+            code.pop()
+        return "".join(code)
 
-def parseClass(item, module_id=None, class_id=None, function_id=None, depth=0):
-    global source_code
-    cls = Class.addClass(name=item.name, module_id=module_id, class_id=class_id)
-    class_id = cls.id
-    start_line = end_line = item.lineno
-    markLineDepth(item, depth)
-    for node in item.body:
-        end_line = parseNode(node, module_id, class_id, function_id, depth+1)
-        # process attributes
-        # TODO: I dont think my solution is proper
-        if isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Attribute):
-                    attr = Attribute.addAttribute(name=target.attr, module_id=module_id, class_id=class_id)
-                    attr.code = source_code[node.lineno]
-                    attr.save()
-                elif isinstance(target, ast.Name):
-                    attr = Attribute.addAttribute(name=target.id, module_id=module_id, class_id=class_id)
-                    attr.code = source_code[node.lineno]
-                    attr.save()
-                else:
-                    # I do not know how to handle these cases
-                    # print type(target), source_code[node.lineno]
-                    pass
-    end_line = getLastLine(end_line, depth)
-    code = getSourceCode(start_line, end_line)
-    cls.code = code
-    cls.save()
-    return end_line
+    def getLastLine(self, line_num, depth):
+        for idx in xrange(line_num+1, self.source_code_len+1):
+            if self.lines_depth[idx] > depth:
+                line_num = idx
+            else:
+                break
+        return line_num
 
-def parseModule(source, module_id=None, depth=0):
-    tree = ast.parse(source)
-    if not hasattr(tree, "body"):
-        return
-    markLineDepth(tree, depth)
-    for item in tree.body:
-        parseNode(item, module_id=module_id, depth=depth+1)
+    def markLineDepth(self, item):
+        if hasattr(item, "lineno"):
+            self.lines_depth[item.lineno] = item.depth
+        if hasattr(item, "body"):
+            if not isinstance(item.body, list):
+                self.lines_depth[item.body.lineno] = item.depth+1
+            else:
+                for node in item.body:
+                    self.lines_depth[node.lineno] = item.depth+1
 
 def parseProject(project_id=0):
     global source_code, lines_depth, source_code_len
@@ -138,31 +163,27 @@ def parseProject(project_id=0):
             if f.endswith(settings.FILE_EXTENSION):
                 fullpath = os.path.join(root, f)
                 source_code = []
-                lines_depth = []
-                module = Module.addModule(name=f[:-name_offset], path=root[path_offset:])
-                module_id = module.id
                 try:
-                    with open(fullpath, "rb") as f:
+                    with open(fullpath, "r") as f1:
                         print fullpath
                         source_code.append("")
-                        lines_depth.append(65535)
-                        for line in f:
-                            lines_depth.append(65535)
+                        for line in f1:
                             try:
                                 source_code.append(line.decode('utf-8'))
                             except UnicodeDecodeError:
                                 source_code.append(line.decode('iso-8859-1'))
-                    source_code_len = len(source_code)-1
-                    if source_code_len > 0:
-                        code = getSourceCode(1, source_code_len)
-                    else:
-                        code = ""
-                    module.code = code
-                    module.lines = source_code_len
-                    module.save()
 
-                    with open(fullpath, "rb") as f:
-                        parseModule(f.read(), module_id=module_id, depth=0)
+                    with open(fullpath, "rb") as f2:
+                        tree = ast.parse(f2.read())
+                        tree.depth = 0
+                        x = NodeParser(source_code, name=f[:-name_offset], path=root[path_offset:])
+                        tree.module_id = None
+                        tree.class_id = None
+                        tree.function_id = None
+                        x.visit(tree)
+                        # print x.lines_depth
+                    #with open(fullpath, "rb") as f:
+                    #    parseModule(f.read(), module_id=module_id, depth=0)
                 except Exception:
                     traceback.print_exc()
                     exit()

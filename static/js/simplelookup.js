@@ -241,7 +241,6 @@
             $scope.result_history.splice(0, 0, obj);
             if($scope.result_history.length > 15)
                 $scope.result_history.pop();
-            console.log($scope.result_history);
             saveHistory();
         };
 
