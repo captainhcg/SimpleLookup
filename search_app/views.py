@@ -8,12 +8,13 @@ from sqlalchemy.orm import joinedload
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
-from search_app import app 
+from search_app import app
 
-projects=settings.PROJECTS
+projects = settings.PROJECTS
 
-# alway pass project_id to view
+
 def init_global(function):
+    """alway pass project_id to view"""
     @wraps(function)
     def wrap(*args, **kwargs):
         global app
@@ -26,9 +27,11 @@ def init_global(function):
         return function(*args, **kwargs)
     return wrap
 
+
 @app.route('/')
 def index():
     return render_template('index.html', projects=projects)
+
 
 @app.route('/search')
 @init_global
@@ -40,6 +43,7 @@ def search():
         return searchModule(request.args)
     elif record_type in ("function", "method"):
         return searchFunction(request.args)
+
 
 def searchFunction(query):
     record_id = query.get('id')
@@ -58,12 +62,13 @@ def searchFunction(query):
             methods.append(method.as_dict(code=False))
     else:
         module = fun.module
-        for fun in g.session.query(Function).filter(Function.module_id==module.id, Function.class_id==None):
+        for fun in g.session.query(Function).filter(Function.module_id == module.id, Function.class_id is None):
             functions.append(fun.as_dict(code=False))
     for li in (attrs, functions, methods):
         for item in li:
             item['project_id'] = g.project_id
     return jsonify({"record": data, "code": code, "attrs": attrs, "functions": functions, "methods": methods})
+
 
 def searchClass(query):
     record_id = query.get('id')
@@ -81,6 +86,7 @@ def searchClass(query):
             item['project_id'] = g.project_id
     return jsonify({"record": data, "code": code, "attrs": attrs, "methods": methods})
 
+
 def searchModule(query):
     record_id = query.get('id')
     module = g.session.query(Module).get(record_id)
@@ -91,7 +97,7 @@ def searchModule(query):
             classes.append(cls.as_dict())
 
     functions = []
-    for fun in g.session.query(Function).filter(Function.module_id==record_id, Function.class_id==None):
+    for fun in g.session.query(Function).filter(Function.module_id == record_id, Function.class_id is None):
         functions.append(fun.as_dict())
 
     if module.lines > 5000:
@@ -101,6 +107,7 @@ def searchModule(query):
         for item in li:
             item['project_id'] = g.project_id
     return jsonify({"record": data, "code": code, "classes": classes, "functions": functions})
+
 
 @app.route('/list')
 @init_global
@@ -121,19 +128,19 @@ def list(**kwargs):
         search_module = search_class = False
 
     if search_module:
-        moduldes = g.session.query(Module).filter(Module.name.like("%%%s%%"%keyword))[0:100]
+        moduldes = g.session.query(Module).filter(Module.name.like("%%%s%%" % keyword))[0:100]
         for m in moduldes:
-            d = m.as_dict();
+            d = m.as_dict()
             result.append(d)
 
     if search_class:
-        classes = g.session.query(Class).options(joinedload('module')).filter(Class.name.like("%%%s%%"%keyword))[0:100]
+        classes = g.session.query(Class).options(joinedload('module')).filter(Class.name.like("%%%s%%" % keyword))[0:100]
         for c in classes:
             d = c.as_dict(code=False)
             result.append(d)
 
     if search_function:
-        functions = g.session.query(Function).options(joinedload('module'), joinedload('cls')).filter(Function.name.like("%%%s%%"%keyword))[0:100]
+        functions = g.session.query(Function).options(joinedload('module'), joinedload('cls')).filter(Function.name.like("%%%s%%" % keyword))[0:100]
         for f in functions:
             d = f.as_dict(code=False)
             result.append(d)
@@ -142,5 +149,5 @@ def list(**kwargs):
         r['project_id'] = project_id
         r['distance'] = Levenshtein.distance(keyword, r['name'].lower())
 
-    result = sorted(result, key=lambda x:x['distance'])[:20]
+    result = sorted(result, key=lambda x: x['distance'])[:20]
     return jsonify({"data": result})

@@ -6,14 +6,12 @@ import settings
 import traceback
 import re
 import ast
-import os, os.path
+import os
+import os.path
 from search_app.models import Module, Class, Function, Attribute
 from search_app.models import setProject, resetDB
 from optparse import OptionParser
 
-source_code = []
-lines_depth = []
-source_code_len = 0
 
 class NodeParser(ast.NodeVisitor):
     source_code = []
@@ -37,11 +35,11 @@ class NodeParser(ast.NodeVisitor):
                 for target in node.targets:
                     if isinstance(target, ast.Attribute):
                         attr = Attribute.addAttribute(name=target.attr, module_id=node.module_id, class_id=node.class_id)
-                        attr.code = source_code[node.lineno]
+                        attr.code = self.source_code[node.lineno]
                         attr.save()
                     elif isinstance(target, ast.Name):
                         attr = Attribute.addAttribute(name=target.id, module_id=node.module_id, class_id=node.class_id)
-                        attr.code = source_code[node.lineno]
+                        attr.code = self.source_code[node.lineno]
                         attr.save()
                     else:
                         # I do not know how to handle these cases
@@ -136,14 +134,14 @@ class NodeParser(ast.NodeVisitor):
                 for node in item.body:
                     self.lines_depth[node.lineno] = item.depth+1
 
+
 def parseProject(project_id=0):
-    global source_code, lines_depth, source_code_len
     setProject(project_id)
-    resetDB();
+    resetDB()
 
     project_settings = settings.PROJECTS[project_id]
     project_path = project_settings['PROJECT_PATH']
-    print "Parsing Project %s"%(project_settings['NAME'])
+    print "Parsing Project %s" % (project_settings['NAME'])
     folder_exclude_patterns = []
     if "FOLDER_EXCLUDE_PATTERNS" in project_settings:
         for pattern in project_settings['FOLDER_EXCLUDE_PATTERNS']:
@@ -181,9 +179,6 @@ def parseProject(project_id=0):
                         tree.class_id = None
                         tree.function_id = None
                         x.visit(tree)
-                        # print x.lines_depth
-                    #with open(fullpath, "rb") as f:
-                    #    parseModule(f.read(), module_id=module_id, depth=0)
                 except Exception:
                     traceback.print_exc()
                     exit()
