@@ -1,4 +1,4 @@
-(function(jQuery){
+var simplelookup = (function(jQuery){
     var app = angular.module('simplelookup', ['ngResource'])
 
     .config(['$interpolateProvider', function($interpolateProvider) {
@@ -259,4 +259,6 @@
             $scope.localStorageService.set("project_id", project_id);
         };
     }]);
+
+    return simplelookup;
 }(jQuery));
