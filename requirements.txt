@@ -2,4 +2,7 @@ python-Levenshtein
 pygments
 pygments-style-github
 sqlalchemy
+jsmin
+cssmin
 flask
+Flask-Assets

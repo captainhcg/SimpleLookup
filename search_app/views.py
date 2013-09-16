@@ -1,4 +1,5 @@
 from flask import render_template, request, jsonify, g
+from flask.ext.assets import Environment, Bundle
 import Levenshtein
 import settings
 from functools import wraps
@@ -11,6 +12,18 @@ from pygments.formatters import HtmlFormatter
 from search_app import app
 
 projects = settings.PROJECTS
+assets = Environment(app)
+common_js = Bundle(
+    'js/jquery.notify.min.js',
+    Bundle(
+        'js/simplelookup.coffee',
+        filters='coffeescript'
+    ),
+    filters='jsmin', output='common_js.js'
+)
+assets.register('common_js', common_js)
+common_css = Bundle('css/style.css', filters='cssmin', output='common_css.css')
+assets.register('common_css', common_css)
 
 
 def init_global(function):

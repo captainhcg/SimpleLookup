@@ -4,3 +4,4 @@ simplelookup.sublime*
 *.db
 *.sqlite
 *.pyc
+.webassets-cache

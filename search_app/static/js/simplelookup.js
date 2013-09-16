@@ -55,6 +55,7 @@
       '$window', function($window) {
         var supports_html5_storage, _supports_html5_storage;
         supports_html5_storage = function() {
+          var e;
           try {
             if (__indexOf.call($window, 'localStorage') >= 0 && $window['localStorage'] !== null) {
               $window.localStorage.setItem('simplelookup', true);
@@ -62,7 +63,8 @@
             } else {
               return false;
             }
-          } catch (e) {
+          } catch (_error) {
+            e = _error;
             return false;
           }
         };
