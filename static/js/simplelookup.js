@@ -1,264 +1,267 @@
-var simplelookup = (function(jQuery){
-    var app = angular.module('simplelookup', ['ngResource'])
+(function() {
+  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-    .config(['$interpolateProvider', function($interpolateProvider) {
+  this.simplelookup = (function($) {
+    var app;
+    app = angular.module('simplelookup', ["ngResource"]);
+    app.config([
+      '$interpolateProvider', function($interpolateProvider) {
         $interpolateProvider.startSymbol('[[');
         $interpolateProvider.endSymbol(']]');
-    }])
-
-    .config(['$locationProvider' ,
-        function($locationProvider){
-            $locationProvider.html5Mode(true);
-        }]
-    )
-
-    // REST 
-    .factory("REST", function(){
-        // the action map for communicating with server
-        return {
-            action_map: {
-                list: {method:'GET', isArray: true, params: { actionController: "list" }},
-                search: {method:'GET', params: { actionController: "search" }},
-            },
-            // http://www.bennadel.com/blog/2433-Using-RESTful-Controllers-In-An-AngularJS-Resource.htm
-            controller_map: {
-                id: "@id",
-                actionController: "@actionController",
-                typeController: "@typeController"
+      }
+    ]);
+    app.factory('REST', function() {
+      return {
+        action_map: {
+          list: {
+            method: 'GET',
+            isArray: true,
+            params: {
+              actionController: 'list'
             }
-        };
-    })
-
-    .service(
-        'notifyService', function(){
-            jQuery(document).ready(function(){
-                $("#notify_container").notify();
-            });
-            this.notify = function(title, text, expire){
-                jQuery("#notify_container").notify("create", {
-                    title: title || "",
-                    text: text || "",
-                    },{
-                        expires: expire || 1000,
-                        speed: 1000
-                    }
-                );
-            };
+          },
+          search: {
+            method: 'GET',
+            params: {
+              actionController: 'search'
+            }
+          }
+        },
+        controller_map: {
+          id: '@id',
+          actionController: "@actionController",
+          typeController: "@typeController"
         }
-    )
-
-    .service(
-        'localStorageService', ['$window', function($window){
-            var supports_html5_storage = function (){
-                try {
-                    if('localStorage' in $window && $window['localStorage'] !== null){
-                        $window.localStorage.setItem('drchrono', true);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } catch (e) {
-                    return false;
-                }
-            };
-            var _supports_html5_storage = supports_html5_storage();
-            this.get = function(key){
-                if(_supports_html5_storage){
-                    return $window.localStorage.getItem(key, true);
-                }
-                return null;
-            };
-            this.set = function(key, value){
-                if(_supports_html5_storage){
-                    $window.localStorage.setItem(key, value);
-                }
-            };
-        }]
-    )
-    .directive('simpleSearch', ["$parse", "notifyService", function($parse, notifyService) {
+      };
+    });
+    app.service('notifyService', function() {
+      var document;
+      document = $(document);
+      return document.ready(function() {
+        var notify_container;
+        notify_container = $('#notify_container');
+        return this.notify = function(title, text, expire) {
+          return notify_container.notify('create', {
+            title: title || '',
+            text: text || ''
+          }, {
+            expire: expire || 1000,
+            speed: 1000
+          });
+        };
+      });
+    });
+    app.service('localStorageService', [
+      '$window', function($window) {
+        var supports_html5_storage, _supports_html5_storage;
+        supports_html5_storage = function() {
+          try {
+            if (__indexOf.call($window, 'localStorage') >= 0 && $window['localStorage'] !== null) {
+              $window.localStorage.setItem('simplelookup', true);
+              return true;
+            } else {
+              return false;
+            }
+          } catch (e) {
+            return false;
+          }
+        };
+        _supports_html5_storage = supports_html5_storage;
+        this.get = function(key) {
+          if (_supports_html5_storage) {
+            return $window.localStorage.getItem(key);
+          }
+        };
+        return this.set = function(key, value) {
+          if (_supports_html5_storage) {
+            return $window.localStorage.setItem(key, value);
+          }
+        };
+      }
+    ]);
+    app.service('search_resources', [
+      '$resource', 'REST', function($resource, REST) {
+        this.lookUpResource = $resource(':actionController/:typeController/', REST.controller_map, REST.action_map);
+        return null;
+      }
+    ]);
+    app.directive('simpleSearch', [
+      "$parse", "notifyService", function($parse, notifyService) {
         return function(scope, element, attrs) {
-            var ngModel = $parse(attrs.ngModel);
-            element.autocomplete({
-                source: function( request, response ) {
-                    $.ajax({
-                        url: "/list",
-                        dataType: "json",
-                        data: {
-                            term: request.term,
-                            project_id: jQuery("#project_id").val(),
-                        },
-                        success: function(data) {
-                            response(data.data);
-                            if(data.data.length === 0){
-                                notifyService.notify("No Result Found...");
-                            }
-                        },
-                        error: function(data){
-                            notifyService.notify("Something is wrong...");
-                        }
-                    });
+          var ngModel;
+          ngModel = $parse(attrs.ngModel);
+          element.autocomplete({
+            source: function(request, response) {
+              return $.ajax({
+                url: "/list",
+                dataType: "json",
+                data: {
+                  term: request.term,
+                  project_id: $("#project_id").val()
                 },
-                minLength: 1,
-                focus: function(event, ui) {
-                    event.preventDefault(); //Don't preopulate field
+                success: function(data) {
+                  response(data.data);
+                  if (data.data.length === 0) {
+                    return notifyService.notify("No Result Found...");
+                  }
                 },
-                select : function(event, data) {
-                    if (data) {
-                        event.preventDefault(); //Keep entry blank
-                        if(ngModel){
-                            scope.$apply(function(scope){
-                                data.item.toString = function(){
-                                    return data.item.name;
-                                };
-                                ngModel.assign(scope, data.item);
-                            });
-                        }
-                    }
+                error: function(data) {
+                  return notifyService.notify("Something is wrong...");
                 }
-            }).data( "ui-autocomplete" )._renderItem = function(ul, item) {
-                return jQuery( "<li>" )
-                    .append( "<a>"+item.label+"<br><small style='color: blue'>"+item.desc+"</small></a>" )
-                    .appendTo( ul );
-                };
-            };
-    }])
-
-    // resources
-    .service(
-        'search_resources',
-        ['$resource', 'REST', function($resource, REST){
-            this.lookUpResource = $resource(':actionController/:typeController/', REST.controller_map, REST.action_map);
-        }
-    ])
-
-    .controller("searchController", ["$scope", "search_resources", "$window", "localStorageService", "notifyService", function($scope, search_resources, $window, localStorageService, notifyService){
+              });
+            },
+            minLength: 1,
+            focus: function(event, ui) {
+              return event.preventDefault;
+            },
+            select: function(event, data) {
+              if (data) {
+                event.preventDefault;
+                if (ngModel) {
+                  return scope.$apply(function(scope) {
+                    data.item.toString = function() {
+                      return data.item.name;
+                    };
+                    return ngModel.assign(scope, data.item);
+                  });
+                }
+              }
+            }
+          });
+          return element.data("ui-autocomplete")._renderItem = function(ul, item) {
+            return $("<li>").append("<a>" + item.label + "<br><small style='color: blue'>" + item.desc + "</small></a>").appendTo(ul);
+          };
+        };
+      }
+    ]);
+    app.controller("searchController", [
+      "$scope", "search_resources", "$window", "localStorageService", "notifyService", function($scope, search_resources, $window, localStorageService, notifyService) {
+        var makePath, pushResult, saveHistory, search;
         $scope.request_id = 1;
-
-        $scope.init = function(){
-            $scope.resource = search_resources.lookUpResource;
-            $scope.info = {
-                project_id: 0,
-            };
-            $scope.localStorageService = localStorageService;
-            $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history")) || [];
-            $scope.info.project_id = $scope.localStorageService.get("project_id") || 0;
+        $scope.init = function() {
+          $scope.resource = search_resources.lookUpResource;
+          $scope.info = {
+            project_id: 0
+          };
+          $scope.localStorageService = localStorageService;
+          $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history")) || [];
+          $scope.info.project_id = $scope.localStorageService.get("project_id") || 0;
         };
-
-        $scope.clearHistory = function(){
-            $scope.record = null;
-            $scope.result_history = [];
-            saveHistory();
+        $scope.clearHistory = function() {
+          $scope.record = null;
+          $scope.result_history = [];
+          saveHistory();
         };
-
-        $scope.resetView = function(){
-            $scope.result = {};
-            $scope.attrs = [];
-            $scope.functions = [];
-            $scope.classes = [];
-            $scope.code = "";
-            $scope.path = {};
+        $scope.resetView = function() {
+          $scope.result = {};
+          $scope.attrs = [];
+          $scope.functions = [];
+          $scope.classes = [];
+          $scope.code = "";
         };
-
-        $scope.searchRecord = function(obj){
-            // notifyService.notify("Loading...");
-            if(obj.label)
-                pushResult(obj);
-            var request = {'id': obj.id, 'type': obj.type, 'project_id': obj.project_id};
-            $scope.resetView();
-            $scope.request_id += 1;
-            if("project_id" in obj)
-                $scope.info.project_id = obj.project_id;
-            search(request, $scope.request_id);
+        $scope.searchRecord = function(obj) {
+          var request;
+          if (obj.label) {
+            pushResult(obj);
+          }
+          request = {
+            'id': obj.id,
+            'type': obj.type,
+            'project_id': obj.project_id
+          };
+          $scope.resetView();
+          $scope.request_id += 1;
+          if (__indexOf.call(obj, "project_id") >= 0) {
+            $scope.info.project_id = obj.project_id;
+          }
+          search(request, $scope.request_id);
         };
-
-        var search = function(request, request_id){
-           $scope.resource.search(request).$then(
-                function(data){
-                    if(request_id != $scope.request_id)
-                        return false;
-                    $window.scrollTo(0, 0);
-                    var response = data.data;
-                    $scope.result = response.record;
-                    $scope.result.project_id = request.project_id;
-                    $scope.code = response.code;
-                    $scope.attrs = response.attrs || [];
-                    $scope.functions = response.functions || [];
-                    $scope.methods = response.methods || [];
-                    $scope.classes = response.classes || [];
-                    makePath($scope.result);
-                },
-                function(){
-                    $scope.loading = false;
-                    notifyService.notify("Something is wrong...");
-                }
-            );
-        };
-
-        var makePath = function(obj){
-            $scope.path = {};
-            if(obj.type == "module"){
-                $scope.path.path = obj.path;
-                $scope.path.module = obj.label;
-                $scope.path.module_id = obj.id;
+        search = function(request, request_id) {
+          $scope.resource.search(request).$then(function(data) {
+            var response;
+            if (request_id !== $scope.request_id) {
+              return false;
             }
-            else if(obj.type == "class"){
-                $scope.path.path = obj.module_path;
-                $scope.path.module = obj.module_name;
-                $scope.path.module_id = obj.module_id;
-                $scope.path.class = obj.label;
-                $scope.path.class_id = obj.id;
-            }
-            else if(obj.type == "function" || obj.type == "method"){
-                $scope.path.path = obj.module_path;
-                $scope.path.module = obj.module_name;
-                $scope.path.module_id = obj.module_id;
-                $scope.path.class = obj.class_name;
-                $scope.path.class_id = obj.class_id;
-                $scope.path.function = obj.label;
-                $scope.path.function_id = obj.id;
-            }
-            $scope.path.project_id = obj.project_id;
+            $window.scrollTo(0, 0);
+            response = data.data;
+            $scope.result = response.record;
+            $scope.result.project_id = request.project_id;
+            $scope.code = response.code;
+            $scope.attrs = response.attrs || [];
+            $scope.functions = response.functions || [];
+            $scope.methods = response.methods || [];
+            $scope.classes = response.classes || [];
+            return makePath($scope.result);
+          }, function() {
+            $scope.loading = false;
+            return notifyService.notify("Something is wrong...");
+          });
         };
-
-        var saveHistory = function(){
-            $scope.localStorageService.set('history', $window.JSON.stringify($scope.result_history, function (key, val) {
-                    if (key == '$$hashKey') {
-                        return undefined;
-                    }
-                    return val;
-                })
-            );
+        makePath = function(obj) {
+          $scope.path = {};
+          if (obj.type === "module") {
+            $scope.path.path = obj.path;
+            $scope.path.module = obj.label;
+            $scope.path.module_id = obj.id;
+          } else if (obj.type === "class") {
+            $scope.path.path = obj.module_path;
+            $scope.path.module = obj.module_name;
+            $scope.path.module_id = obj.module_id;
+            $scope.path["class"] = obj.label;
+            $scope.path.class_id = obj.id;
+          } else if (obj.type === "function" || obj.type === "method") {
+            $scope.path.path = obj.module_path;
+            $scope.path.module = obj.module_name;
+            $scope.path.module_id = obj.module_id;
+            $scope.path["class"] = obj.class_name;
+            $scope.path.class_id = obj.class_id;
+            $scope.path["function"] = obj.label;
+            $scope.path.function_id = obj.id;
+          }
+          $scope.path.project_id = obj.project_id;
+          return $scope.path;
         };
-
-        var pushResult = function(obj){
-            var index = -1;
-            for(var i=$scope.result_history.length-1; i>=0; i--){
-                var r = $scope.result_history[i];
-                if(r.id==obj.id && r.name==obj.name && r.type==obj.type){
-                    $scope.result_history.splice(i, 1);
-                }
+        saveHistory = function() {
+          return $scope.localStorageService.set('history', $window.JSON.stringify($scope.result_history, function(key, val) {
+            if (key === "$$hashKey") {
+              return void 0;
+            } else {
+              return val;
             }
-            $scope.result_history.splice(0, 0, obj);
-            if($scope.result_history.length > 15)
-                $scope.result_history.pop();
-            saveHistory();
+          }));
         };
-
-        $scope.result_history = [];
-
-        $scope.$watch("record", function(nv){
-            if(nv && typeof nv === "object"){
-                $scope.searchRecord(nv);
+        pushResult = function(obj) {
+          var idx, r;
+          idx = $scope.result_history.length;
+          while (idx) {
+            idx = idx - 1;
+            r = $scope.result_history[idx];
+            if (r.id === obj.id && r.name === obj.name && r.type === obj.type) {
+              $scope.result_history.splice(idx, 1);
             }
+          }
+          $scope.result_history.splice(0, 0, obj);
+          if ($scope.result_history.length > 15) {
+            $scope.result_history.pop;
+          }
+          return saveHistory();
+        };
+        return $scope.$watch("record", function(nv) {
+          if (nv && typeof nv === "object") {
+            $scope.searchRecord(nv);
+          }
         });
-    }])
-
-    .controller("navbarController", ["$scope", "$window", function($scope, $window){
-        $scope.changeProject = function(project_id){
-            $scope.info.project_id = project_id;
-            $scope.localStorageService.set("project_id", project_id);
+      }
+    ]);
+    app.controller("navbarController", [
+      "$scope", "$window", function($scope, $window) {
+        return $scope.changeProject = function(project_id) {
+          $scope.info.project_id = project_id;
+          return $scope.localStorageService.set("project_id", project_id);
         };
-    }]);
+      }
+    ]);
+    return app;
+  })(jQuery);
 
-    return simplelookup;
-}(jQuery));
+}).call(this);
