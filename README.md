@@ -5,6 +5,7 @@ SimpleLookup
 
 * Install Required Packages: `sudo pip install -r requirements.txt`
   + Flask,  [A lightweight Python web framework](http://flask.pocoo.org/)
+  + Flask-Assets,  [Integrate webassets into Flask application.](http://elsdoerfer.name/docs/flask-assets/)
   + SQLalchemy, [The Database Toolkit for Python](http://www.sqlalchemy.org/)
   + python-Levenshtein, [Computing string distances for sorting](https://pypi.python.org/pypi/python-Levenshtein/)
   + Pygments, [Python Syntax Highlighter](http://pygments.org/)
