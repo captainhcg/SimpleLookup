@@ -171,8 +171,8 @@ def parseProject(project_id=0):
                             except UnicodeDecodeError:
                                 source_code.append(line.decode('iso-8859-1'))
 
-                    with open(fullpath, "rb") as f2:
-                        tree = ast.parse(f2.read())
+                        f1.seek(0)
+                        tree = ast.parse(f1.read())
                         tree.depth = 0
                         x = NodeParser(source_code, name=f[:-name_offset], path=root[path_offset:])
                         tree.module_id = None
