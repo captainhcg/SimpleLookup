@@ -19,7 +19,7 @@ common_js = Bundle(
         'js/simplelookup.coffee',
         filters='coffeescript'
     ),
-    filters='jsmin', output='common_js.js'
+    output='common_js.js'
 )
 assets.register('common_js', common_js)
 common_css = Bundle('css/style.css', filters='cssmin', output='common_css.css')

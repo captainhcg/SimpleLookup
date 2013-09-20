@@ -18,15 +18,17 @@ this.simplelookup = (($)->
             typeController: "@typeController"
 
     app.service 'notifyService', ->
-        document = $(document)
-        document.ready ->
-            notify_container = $('#notify_container')
-            @notify = (title, text, expire) ->
-                notify_container.notify(
-                    'create', 
-                    {title: title || '', text: text || ''}, 
-                    {expire: expire || 1000, speed: 1000},
-                )
+        $(document).ready ->
+            $('#notify_container').notify()
+            return
+        @notify = (title, text, expire) ->
+            $('#notify_container').notify(
+                'create', 
+                {title: title || '', text: text || ''}, 
+                {expire: expire || 1000, speed: 1000},
+            )
+            return
+        return
 
     app.service 'localStorageService', 
         ['$window', ($window)->
@@ -40,7 +42,7 @@ this.simplelookup = (($)->
                 catch e
                     false
 
-            _supports_html5_storage = supports_html5_storage
+            _supports_html5_storage = supports_html5_storage()
             @get = (key)->
                 if _supports_html5_storage
                     $window.localStorage.getItem key
@@ -48,6 +50,7 @@ this.simplelookup = (($)->
             @set = (key, value)->
                 if _supports_html5_storage
                     $window.localStorage.setItem key, value
+            return
         ]
 
     app.service 'search_resources',
@@ -71,6 +74,7 @@ this.simplelookup = (($)->
                             success: (data)->
                                 response data.data
                                 if data.data.length == 0
+                                    console.log notifyService
                                     notifyService.notify "No Result Found..."
                             error: (data)->
                                 notifyService.notify "Something is wrong..."
@@ -102,7 +106,7 @@ this.simplelookup = (($)->
                 $scope.resource = search_resources.lookUpResource
                 $scope.info = project_id: 0
                 $scope.localStorageService = localStorageService
-                $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history")) or []
+                $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history") or "[]") or []
                 $scope.info.project_id = $scope.localStorageService.get("project_id") or 0
                 return
 
