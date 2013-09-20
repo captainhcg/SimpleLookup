@@ -66,7 +66,7 @@ this.simplelookup = (function($) {
       supports_html5_storage = function() {
         var e;
         try {
-          if (__indexOf.call($window, 'localStorage') >= 0 && $window['localStorage'] !== null) {
+          if ('localStorage' in $window && $window['localStorage'] !== null) {
             $window.localStorage.setItem('simplelookup', true);
             return true;
           } else {
@@ -258,11 +258,12 @@ this.simplelookup = (function($) {
         }
         return saveHistory();
       };
-      return $scope.$watch("record", function(nv) {
+      $scope.$watch("record", function(nv) {
         if (nv && typeof nv === "object") {
           $scope.searchRecord(nv);
         }
       });
+      $scope.init();
     }
   ]);
   app.controller("navbarController", [

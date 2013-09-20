@@ -34,7 +34,7 @@ this.simplelookup = (($)->
         ['$window', ($window)->
             supports_html5_storage = ->
                 try
-                    if 'localStorage' in $window && $window['localStorage'] isnt null
+                    if 'localStorage' of $window and $window['localStorage'] isnt null
                         $window.localStorage.setItem 'simplelookup', true
                         true
                     else
@@ -202,6 +202,8 @@ this.simplelookup = (($)->
                 if nv and typeof(nv) == "object"
                     $scope.searchRecord nv
                 return
+            $scope.init()
+            return
         ]
 
     app.controller "navbarController", 
