@@ -64,7 +64,6 @@ this.simplelookup = (function($) {
     '$window', function($window) {
       var supports_html5_storage, _supports_html5_storage;
       supports_html5_storage = function() {
-        var e;
         try {
           if ('localStorage' in $window && $window['localStorage'] !== null) {
             $window.localStorage.setItem('simplelookup', true);
@@ -72,8 +71,7 @@ this.simplelookup = (function($) {
           } else {
             return false;
           }
-        } catch (_error) {
-          e = _error;
+        } catch (e) {
           return false;
         }
       };
@@ -252,9 +250,9 @@ this.simplelookup = (function($) {
             $scope.result_history.splice(idx, 1);
           }
         }
-        $scope.result_history.splice(0, 0, obj);
+        $scope.result_history.splice(0, 0, angular.copy(obj));
         if ($scope.result_history.length > 15) {
-          $scope.result_history.pop;
+          $scope.result_history.pop();
         }
         return saveHistory();
       };

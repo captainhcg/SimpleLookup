@@ -22,9 +22,9 @@ common_js = Bundle(
     output='common_js.js'
 )
 assets.register('common_js', common_js)
-common_css = Bundle('css/style.css', filters='cssmin', output='common_css.css')
+common_css = Bundle('css/style.css', output='common_css.css')
 assets.register('common_css', common_css)
-assets.config["auto_build"] = False
+
 
 def init_global(function):
     """alway pass project_id to view"""

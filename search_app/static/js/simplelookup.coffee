@@ -194,8 +194,8 @@ this.simplelookup = (($)->
                     if r.id==obj.id and r.name==obj.name and r.type==obj.type
                         $scope.result_history.splice idx, 1
 
-                $scope.result_history.splice 0, 0, obj
-                $scope.result_history.pop if $scope.result_history.length > 15
+                $scope.result_history.splice(0, 0, angular.copy(obj))
+                $scope.result_history.pop() if $scope.result_history.length > 15
                 saveHistory()
 
             $scope.$watch "record", (nv)->

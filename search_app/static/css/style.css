@@ -88,6 +88,33 @@ pre{
     text-align: left;
     color: #999;
 }
+
+.animate-enter, 
+.animate-leave
+{ 
+    -webkit-transition:all linear 300ms;
+    -moz-transition:all linear 300ms;
+    -ms-transition:all linear 300ms;
+    -o-transition:all linear 300ms;
+    transition:all linear 300ms;
+    position: relative;
+    display: block;
+} 
+
+.animate-enter.animate-enter-active, 
+.animate-leave {
+    opacity: 1;
+    top: 0;
+    height: 30px;
+}
+
+.animate-leave.animate-leave-active,
+.animate-enter {
+    opacity: 0;
+    top: -10px;
+    height: 0px;
+}
+
 .ui-notify { width:350px; position:fixed; top:60px; right:10px; z-index:9999;}
 .ui-notify-message { padding:10px; margin-bottom:15px; -moz-border-radius:8px; -webkit-border-radius:8px; border-radius:8px }
 .ui-notify-message h1 { font-size:14px; margin:0; padding:0 }
