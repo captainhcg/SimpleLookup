@@ -1,7 +1,7 @@
 this.simplelookup = (($)->
-    
+
     app = angular.module 'simplelookup', ["ngResource"]
-    
+
     app.config ['$interpolateProvider', ($interpolateProvider)->
         $interpolateProvider.startSymbol '[['
         $interpolateProvider.endSymbol ']]'
@@ -12,6 +12,7 @@ this.simplelookup = (($)->
         action_map:
             list: {method:'GET', isArray: true, params: {actionController: 'list'}}
             search: {method: 'GET', params: {actionController: 'search'}}
+            track: {method: 'GET', params: {actionController: 'track'}}
         controller_map:
             id: '@id'
             actionController: "@actionController"
@@ -23,14 +24,14 @@ this.simplelookup = (($)->
             return
         @notify = (title, text, expire) ->
             $('#notify_container').notify(
-                'create', 
-                {title: title || '', text: text || ''}, 
+                'create',
+                {title: title || '', text: text || ''},
                 {expire: expire || 1000, speed: 1000},
             )
             return
         return
 
-    app.service 'localStorageService', 
+    app.service 'localStorageService',
         ['$window', ($window)->
             supports_html5_storage = ->
                 try
@@ -46,7 +47,7 @@ this.simplelookup = (($)->
             @get = (key)->
                 if _supports_html5_storage
                     $window.localStorage.getItem key
-          
+
             @set = (key, value)->
                 if _supports_html5_storage
                     $window.localStorage.setItem key, value
@@ -132,6 +133,18 @@ this.simplelookup = (($)->
                 $scope.info.project_id = obj.project_id if "project_id" in obj
                 search request, $scope.request_id
                 return
+
+            $scope.getRevisions = (obj)->
+                $scope.resource.track(obj).$then(
+                    (data)->
+                        $scope.loading = false
+                        console.log data
+                    ->
+                        $scope.loading = false
+                        notifyService.notify "Something is wrong..."
+                )
+                return
+
 
             search = (request, request_id)->
                 $scope.resource.search(request).$then(

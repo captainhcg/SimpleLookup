@@ -8,9 +8,6 @@
         <title>Simple Lookup</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            
-        </style>
     </head>
     <body ng-controller="searchController" ng-init="init()">
         <div class="navbar navbar-inverse navbar-fixed-top">
@@ -60,7 +57,8 @@
                         <a ng-if="path.class" ng-bind="path.class" ng-click="searchRecord({project_id: [[path.project_id]], id: [[path.class_id]], type: 'class'})"></a>
                         <span ng-show="path.function">.</span>
                         <a ng-if="path.function" ng-bind="path.function"></a>
-                    </div>        
+                        <button class="btn btn-success btn-xs" ng-show="path.class_id || path.function_id" ng-click="getRevisions(path)" style="margin-left: 20px">Revision History</button>
+                    </div>
                     <div ng-show="code" id="code">
                         <div ng-bind-html-unsafe="code">
                         </div>

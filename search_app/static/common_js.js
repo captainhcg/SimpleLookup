@@ -37,6 +37,12 @@ this.simplelookup = (function($) {
           params: {
             actionController: 'search'
           }
+        },
+        track: {
+          method: 'GET',
+          params: {
+            actionController: 'track'
+          }
         }
       },
       controller_map: {
@@ -185,6 +191,15 @@ this.simplelookup = (function($) {
           $scope.info.project_id = obj.project_id;
         }
         search(request, $scope.request_id);
+      };
+      $scope.getRevisions = function(obj) {
+        $scope.resource.track(obj).$then(function(data) {
+          $scope.loading = false;
+          return console.log(data);
+        }, function() {
+          $scope.loading = false;
+          return notifyService.notify("Something is wrong...");
+        });
       };
       search = function(request, request_id) {
         $scope.resource.search(request).$then(function(data) {
