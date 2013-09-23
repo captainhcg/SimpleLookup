@@ -75,17 +75,16 @@ this.simplelookup = (($)->
                             success: (data)->
                                 response data.data
                                 if data.data.length == 0
-                                    console.log notifyService
                                     notifyService.notify "No Result Found..."
                             error: (data)->
                                 notifyService.notify "Something is wrong..."
                             }
                     minLength: 1,
                     focus: (event, ui)->
-                        event.preventDefault 
+                        event.preventDefault()
                     select: (event, data)->
                         if data
-                            event.preventDefault
+                            event.preventDefault()
                             if ngModel
                                 scope.$apply (scope)->
                                     data.item.toString = ->

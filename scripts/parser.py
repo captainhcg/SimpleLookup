@@ -112,7 +112,7 @@ class NodeParser(ast.NodeVisitor):
     def getSourceCode(self, start_line, end_line):
         code = self.source_code[start_line: end_line+1]
         # remove the blank lines at the end of section
-        while not code[-1].strip(" \r\n\t"):
+        while code and not code[-1].strip(" \r\n\t"):
             code.pop()
         return "".join(code)
 
