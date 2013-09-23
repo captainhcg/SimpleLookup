@@ -156,7 +156,7 @@ def parseProject(project_id=0):
         if continue_flag:
             continue
         name_offset = len(settings.FILE_EXTENSION)
-        path_offset = len(project_path) + 1  # to remove '/'
+        path_offset = len(project_path)
         for f in files:
             if f.endswith(settings.FILE_EXTENSION):
                 fullpath = os.path.join(root, f)
