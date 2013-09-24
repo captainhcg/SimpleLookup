@@ -83,6 +83,7 @@ class Class(Base):
 
     def save(self):
         session.add(self)
+        session.commit()
 
     def as_dict(self, code=True):
         return {
@@ -127,6 +128,7 @@ class Function(Base):
 
     def save(self):
         session.add(self)
+        session.commit()
 
     @property
     def description(self):

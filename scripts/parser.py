@@ -88,7 +88,6 @@ class NodeParser(ast.NodeVisitor):
         module.lines = self.source_code_len
         module.save()
         self.generic_visit(node)
-        module.save()
 
     def visit_ClassDef(self, node):
         self.lines_depth[node.lineno] = node.depth

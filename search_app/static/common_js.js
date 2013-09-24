@@ -119,7 +119,6 @@ this.simplelookup = (function($) {
               success: function(data) {
                 response(data.data);
                 if (data.data.length === 0) {
-                  console.log(notifyService);
                   return notifyService.notify("No Result Found...");
                 }
               },
