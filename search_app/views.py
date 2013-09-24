@@ -68,14 +68,14 @@ def searchFunction(query):
     attrs = []
     if fun.class_id:
         cls = fun.cls
-        for attr in cls.attributes:
+        for attr in sorted(cls.attributes, key=lambda x :x.name):
             attrs.append(attr.as_dict())
         methods = []
-        for method in cls.methods:
+        for method in sorted(cls.methods, key=lambda x :x.name):
             methods.append(method.as_dict(code=False))
     else:
         module = fun.module
-        for fun in g.session.query(Function).filter(Function.module_id == module.id, Function.class_id is None):
+        for fun in g.session.query(Function).filter(Function.module_id == module.id, Function.class_id is None).order_by(Function.name):
             functions.append(fun.as_dict(code=False))
     for li in (attrs, functions, methods):
         for item in li:
@@ -89,10 +89,10 @@ def searchClass(query):
     code = highlight(cls.code, PythonLexer(), HtmlFormatter(style='github', linenos='table'))
     data = cls.as_dict(code=False)
     attrs = []
-    for attr in cls.attributes:
+    for attr in sorted(cls.attributes, key=lambda x :x.name):
         attrs.append(attr.as_dict())
     methods = []
-    for method in cls.methods:
+    for method in sorted(cls.methods, key=lambda x :x.name):
         methods.append(method.as_dict(code=False))
     for li in (attrs, methods):
         for item in li:
@@ -105,12 +105,12 @@ def searchModule(query):
     module = g.session.query(Module).get(record_id)
     data = module.as_dict(code=False)
     classes = []
-    for cls in module.classes:
+    for cls in sorted(module.classes, key=lambda x :x.name):
         if not cls.parent_class_id:
             classes.append(cls.as_dict())
 
     functions = []
-    for fun in g.session.query(Function).filter(Function.module_id == record_id, Function.class_id is None):
+    for fun in g.session.query(Function).filter(Function.module_id == record_id, Function.class_id is None).order_by(Function.name):
         functions.append(fun.as_dict())
 
     if module.lines > 5000:
