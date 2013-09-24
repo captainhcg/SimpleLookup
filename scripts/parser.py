@@ -8,6 +8,7 @@ import re
 import ast
 import os
 import os.path
+import array
 from search_app.models import Module, Class, Function, Attribute
 from search_app.models import setProject, resetDB
 from optparse import OptionParser
@@ -23,7 +24,7 @@ class NodeParser(ast.NodeVisitor):
     def __init__(self, code_list, name, path):
         self.source_code = code_list
         self.source_code_len = len(code_list)-1
-        self.lines_depth = [65535] * (self.source_code_len+1)
+        self.lines_depth = array.array('I', [65535] * (self.source_code_len+1))
         self.path = path
         self.name = name
 
@@ -87,6 +88,7 @@ class NodeParser(ast.NodeVisitor):
         module.lines = self.source_code_len
         module.save()
         self.generic_visit(node)
+        module.save()
 
     def visit_ClassDef(self, node):
         self.lines_depth[node.lineno] = node.depth
@@ -170,7 +172,6 @@ def parseProject(project_id=0):
                                 source_code.append(line.decode('utf-8'))
                             except UnicodeDecodeError:
                                 source_code.append(line.decode('iso-8859-1'))
-
                         f1.seek(0)
                         tree = ast.parse(f1.read())
                         tree.depth = 0

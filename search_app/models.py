@@ -56,6 +56,8 @@ class Module(Base):
     @staticmethod
     def addModule(name="", path=""):
         m = Module(name=name)
+        if path and path[0] == "/":
+            path = path[1:]
         m.path = path
         m.save()
         return m
@@ -81,7 +83,6 @@ class Class(Base):
 
     def save(self):
         session.add(self)
-        session.commit()
 
     def as_dict(self, code=True):
         return {
@@ -126,7 +127,6 @@ class Function(Base):
 
     def save(self):
         session.add(self)
-        session.commit()
 
     @property
     def description(self):
@@ -176,7 +176,6 @@ class Attribute(Base):
 
     def save(self):
         session.add(self)
-        session.commit()
 
     def as_dict(self):
         return {
