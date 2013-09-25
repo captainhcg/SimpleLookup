@@ -65,14 +65,6 @@
                     </div>
                 </div>
                 <div class="pull-left" style="width: 29%">
-                    <div ng-show="attrs" style="padding-left: 30px; float: left">
-                        <h4>Attributes</h4>
-                        <ul>
-                            <li ng-repeat="attr in attrs">
-                                <span ng-bind="attr.name"></span>
-                            </li>
-                        </ul>
-                    </div>
                     <div ng-show="methods" style="padding-left: 30px; float: left">
                         <h4>Methods</h4>
                         <ul>
@@ -86,6 +78,14 @@
                         <ul>
                             <li ng-repeat="fun in functions">
                                 <a ng-click="searchRecord(fun)" ng-bind="fun.name"></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div ng-show="attrs" style="padding-left: 30px; float: left">
+                        <h4>Attributes</h4>
+                        <ul>
+                            <li ng-repeat="attr in attrs">
+                                <span ng-bind="attr.name"></span>
                             </li>
                         </ul>
                     </div>
