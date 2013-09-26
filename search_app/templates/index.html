@@ -49,19 +49,31 @@
             </div>
             <div id="main">
                 <div class="pull-left" style="width: 70%">
-                    <div ng-show="path" style="margin-left: 20px; margin-bottom: 10px; font-weight: bold">
-                        <span ng-show="path.path" ng-bind="path.path"></span>
+                    <div ng-show="path" style="margin-bottom: 10px; font-weight: bold; width: 100%">
+                        <span ng-show="path.path" ng-bind="path.path" style="margin-left: 20px"></span>
                         <span ng-show="path.path">/</span>
                         <a ng-if="path.module" ng-bind="path.module" ng-click="searchRecord({project_id: [[path.project_id]], id: [[path.module_id]], type: 'module'})"></a>
                         <span ng-show="path.class">.</span>
                         <a ng-if="path.class" ng-bind="path.class" ng-click="searchRecord({project_id: [[path.project_id]], id: [[path.class_id]], type: 'class'})"></a>
                         <span ng-show="path.function">.</span>
                         <a ng-if="path.function" ng-bind="path.function"></a>
-                        <button class="btn btn-success btn-xs" ng-show="path.class_id || path.function_id" ng-click="getRevisions(path)" style="margin-left: 20px">Revision History</button>
+                        <button class="btn btn-info btn-xs pull-right" ng-show="viewing!='code'" ng-click="viewing='code'" style="margin-left: 20px">Current Version</button>
+                        <button class="btn btn-success btn-xs pull-right" ng-show="viewing!='revisions' && (path.class_id || path.function_id)" ng-click="getRevisions(path)" style="margin-left: 20px">Revision History</button>
                     </div>
-                    <div ng-show="code" id="code">
-                        <div ng-bind-html-unsafe="code">
+                    <div ng-show="code && viewing=='code'">
+                        <div ng-bind-html-unsafe="code" class="source_code">
                         </div>
+                    </div>
+
+                    <div ng-show="revisions.list && viewing=='revisions'">
+                        <ul class="list-group">
+                            <li class="list-group-item" ng-repeat="r in revisions.list">
+                                <span class="cursor_pointer" ng-click="r.display = !r.display">
+                                    <a>[[r.revision.hash]]</a>: [[r.revision.subject]] ---- by [[r.revision.author]] on [[r.revision.date]]
+                                </span>
+                                <div style="margin-top: 10px; margin-bottom: 5px" ng-if="r.display" ng-bind-html-unsafe="r.highlighted" class="source_code"></div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
                 <div class="pull-left" style="width: 29%">
@@ -96,7 +108,7 @@
                                 <a ng-click="searchRecord(class)" ng-bind="class.name"></a>
                             </li>
                         </ul>
-                    </div>     
+                    </div>
                 </div>
             </div>
         </div>

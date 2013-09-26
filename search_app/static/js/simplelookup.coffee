@@ -108,6 +108,8 @@ this.simplelookup = (($)->
                 $scope.localStorageService = localStorageService
                 $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history") or "[]") or []
                 $scope.info.project_id = $scope.localStorageService.get("project_id") or 0
+                $scope.revisions = {}
+                $scope.viewing = "code"
                 return
 
             $scope.clearHistory = ->
@@ -136,8 +138,11 @@ this.simplelookup = (($)->
             $scope.getRevisions = (obj)->
                 $scope.resource.track(obj).$then(
                     (data)->
+                        response = data.data
                         $scope.loading = false
-                        console.log data
+                        $scope.viewing = "revisions"
+                        $scope.revisions = {}
+                        $scope.revisions.list = response.data
                     ->
                         $scope.loading = false
                         notifyService.notify "Something is wrong..."
@@ -150,6 +155,8 @@ this.simplelookup = (($)->
                     (data)->
                         return false if request_id != $scope.request_id 
                         $window.scrollTo 0, 0
+                        $scope.loading = false
+                        $scope.viewing = "code"
                         response = data.data
                         $scope.result = response.record
                         $scope.result.project_id = request.project_id
@@ -211,6 +218,7 @@ this.simplelookup = (($)->
                 saveHistory()
 
             $scope.$watch "record", (nv)->
+                $scope.revisions = {}
                 if nv and typeof(nv) == "object"
                     $scope.searchRecord nv
                 return

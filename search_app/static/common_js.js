@@ -70,7 +70,6 @@ this.simplelookup = (function($) {
     '$window', function($window) {
       var supports_html5_storage, _supports_html5_storage;
       supports_html5_storage = function() {
-        var e;
         try {
           if ('localStorage' in $window && $window['localStorage'] !== null) {
             $window.localStorage.setItem('simplelookup', true);
@@ -78,8 +77,7 @@ this.simplelookup = (function($) {
           } else {
             return false;
           }
-        } catch (_error) {
-          e = _error;
+        } catch (e) {
           return false;
         }
       };
@@ -163,6 +161,8 @@ this.simplelookup = (function($) {
         $scope.localStorageService = localStorageService;
         $scope.result_history = $window.JSON.parse($scope.localStorageService.get("history") || "[]") || [];
         $scope.info.project_id = $scope.localStorageService.get("project_id") || 0;
+        $scope.revisions = {};
+        $scope.viewing = "code";
       };
       $scope.clearHistory = function() {
         $scope.record = null;
@@ -195,8 +195,12 @@ this.simplelookup = (function($) {
       };
       $scope.getRevisions = function(obj) {
         $scope.resource.track(obj).$then(function(data) {
+          var response;
+          response = data.data;
           $scope.loading = false;
-          return console.log(data);
+          $scope.viewing = "revisions";
+          $scope.revisions = {};
+          return $scope.revisions.list = response.data;
         }, function() {
           $scope.loading = false;
           return notifyService.notify("Something is wrong...");
@@ -209,6 +213,8 @@ this.simplelookup = (function($) {
             return false;
           }
           $window.scrollTo(0, 0);
+          $scope.loading = false;
+          $scope.viewing = "code";
           response = data.data;
           $scope.result = response.record;
           $scope.result.project_id = request.project_id;
@@ -273,6 +279,7 @@ this.simplelookup = (function($) {
         return saveHistory();
       };
       $scope.$watch("record", function(nv) {
+        $scope.revisions = {};
         if (nv && typeof nv === "object") {
           $scope.searchRecord(nv);
         }
