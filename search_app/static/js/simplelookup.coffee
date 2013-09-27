@@ -135,13 +135,32 @@ this.simplelookup = (($)->
                 search request, $scope.request_id
                 return
 
+
+            sameRecord = (o1, o2)->
+                if not o1 and not o2
+                    true
+                else if o1 and o2
+                    cmp_list = ['project_id', 'function_id', 'module_id', 'class_id']
+                    for attr in cmp_list
+                        if o1[attr] != o2[attr]
+                            false
+                    true
+                else
+                    false
+
             $scope.getRevisions = (obj)->
+                if sameRecord obj, $scope.revisions.obj
+                    $scope.viewing = "revisions"
+                    return
+
+                $scope.loading = true
                 $scope.resource.track(obj).$then(
                     (data)->
                         response = data.data
                         $scope.loading = false
                         $scope.viewing = "revisions"
                         $scope.revisions = {}
+                        $scope.revisions.obj = obj;
                         $scope.revisions.list = response.data
                     ->
                         $scope.loading = false

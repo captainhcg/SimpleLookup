@@ -151,7 +151,7 @@ this.simplelookup = (function($) {
   ]);
   app.controller("searchController", [
     "$scope", "search_resources", "$window", "localStorageService", "notifyService", function($scope, search_resources, $window, localStorageService, notifyService) {
-      var makePath, pushResult, saveHistory, search;
+      var makePath, pushResult, sameRecord, saveHistory, search;
       $scope.request_id = 1;
       $scope.init = function() {
         $scope.resource = search_resources.lookUpResource;
@@ -193,13 +193,36 @@ this.simplelookup = (function($) {
         }
         search(request, $scope.request_id);
       };
+      sameRecord = function(o1, o2) {
+        var attr, cmp_list, _i, _len;
+        if (!o1 && !o2) {
+          return true;
+        } else if (o1 && o2) {
+          cmp_list = ['project_id', 'function_id', 'module_id', 'class_id'];
+          for (_i = 0, _len = cmp_list.length; _i < _len; _i++) {
+            attr = cmp_list[_i];
+            if (o1[attr] !== o2[attr]) {
+              false;
+            }
+          }
+          return true;
+        } else {
+          return false;
+        }
+      };
       $scope.getRevisions = function(obj) {
+        if (sameRecord(obj, $scope.revisions.obj)) {
+          $scope.viewing = "revisions";
+          return;
+        }
+        $scope.loading = true;
         $scope.resource.track(obj).$then(function(data) {
           var response;
           response = data.data;
           $scope.loading = false;
           $scope.viewing = "revisions";
           $scope.revisions = {};
+          $scope.revisions.obj = obj;
           return $scope.revisions.list = response.data;
         }, function() {
           $scope.loading = false;
