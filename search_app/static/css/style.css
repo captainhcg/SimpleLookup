@@ -102,6 +102,9 @@ pre{
 table.diff{
     font-size: 12px;
 }
+.list-group-item .btn-xs{
+    min-width: 80px;
+}
 .animate-enter, 
 .animate-leave
 { 

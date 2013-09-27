@@ -83,7 +83,7 @@ class NodeParser(ast.NodeVisitor):
         if self.source_code_len > 0:
             code = self.getSourceCode(1, self.source_code_len)
         else:
-            code = ""
+            code = None
         module.code = code
         module.lines = self.source_code_len
         module.save()

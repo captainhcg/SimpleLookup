@@ -68,10 +68,17 @@
                     <div ng-show="revisions.list && viewing=='revisions'">
                         <ul class="list-group">
                             <li class="list-group-item" ng-repeat="r in revisions.list">
-                                <span class="cursor_pointer" ng-click="r.display = !r.display">
-                                    <a>[[r.revision.hash]]</a>: [[r.revision.subject]] ---- by [[r.revision.author]] on [[r.revision.date]]
-                                </span>
-                                <div style="margin-top: 10px; margin-bottom: 5px" ng-if="r.display" ng-bind-html-unsafe="r.highlighted" class="source_code"></div>
+                                <div class="row">
+                                    <div class="cursor_pointer col-md-8">
+                                        <span ng-click="r.display = !r.display">
+                                            <a>[[r.revision.hash]]</a>: [[r.revision.subject]] ---- by [[r.revision.author]] on [[r.revision.date]]
+                                        </span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-danger btn-xs pull-right" ng-if="r.highlighted === null">Empty</button>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 10px; margin-bottom: 5px" ng-if="r.display && r.highlighted !== null" ng-bind-html-unsafe="r.highlighted" class="source_code"></div>
                             </li>
                         </ul>
                     </div>
