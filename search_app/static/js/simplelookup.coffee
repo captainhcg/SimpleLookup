@@ -143,12 +143,13 @@ this.simplelookup = (($)->
                     cmp_list = ['project_id', 'function_id', 'module_id', 'class_id']
                     for attr in cmp_list
                         if o1[attr] != o2[attr]
-                            false
+                            return false
                     true
                 else
                     false
 
             $scope.getRevisions = (obj)->
+                console.log(sameRecord obj, $scope.revisions.obj)
                 if sameRecord obj, $scope.revisions.obj
                     $scope.viewing = "revisions"
                     return

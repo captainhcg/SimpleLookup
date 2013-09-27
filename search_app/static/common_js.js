@@ -202,7 +202,7 @@ this.simplelookup = (function($) {
           for (_i = 0, _len = cmp_list.length; _i < _len; _i++) {
             attr = cmp_list[_i];
             if (o1[attr] !== o2[attr]) {
-              false;
+              return false;
             }
           }
           return true;
@@ -211,6 +211,7 @@ this.simplelookup = (function($) {
         }
       };
       $scope.getRevisions = function(obj) {
+        console.log(sameRecord(obj, $scope.revisions.obj));
         if (sameRecord(obj, $scope.revisions.obj)) {
           $scope.viewing = "revisions";
           return;
