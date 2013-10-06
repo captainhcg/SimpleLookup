@@ -1,0 +1,3 @@
+[submodule "track_app"]
+	path = track_app
+	url = git@github.com:captainhcg/SimpleTrack.git
