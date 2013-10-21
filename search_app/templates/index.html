@@ -69,12 +69,12 @@
                         <ul class="list-group">
                             <li class="list-group-item" ng-repeat="r in revisions.list">
                                 <div class="row">
-                                    <div class="cursor_pointer col-md-8">
+                                    <div class="cursor_pointer col-md-10">
                                         <span ng-click="toggleDisplay(r)">
                                             <a>[[r.revision.hash]]</a>: [[r.revision.subject]] ---- by [[r.revision.author]] on [[r.revision.date]]
                                         </span>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
                                         <button class="btn btn-danger btn-xs pull-right" ng-if="r.highlighted === null">Empty</button>
                                     </div>
                                 </div>

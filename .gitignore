@@ -6,3 +6,4 @@ simplelookup.sublime*
 *.sqlite
 *.pyc
 .webassets-cache
+common_js.js
