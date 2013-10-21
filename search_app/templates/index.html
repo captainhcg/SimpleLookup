@@ -70,7 +70,7 @@
                             <li class="list-group-item" ng-repeat="r in revisions.list">
                                 <div class="row">
                                     <div class="cursor_pointer col-md-8">
-                                        <span ng-click="r.display = !r.display">
+                                        <span ng-click="toggleDisplay(r)">
                                             <a>[[r.revision.hash]]</a>: [[r.revision.subject]] ---- by [[r.revision.author]] on [[r.revision.date]]
                                         </span>
                                     </div>
@@ -81,6 +81,7 @@
                                 <div style="margin-top: 10px; margin-bottom: 5px" ng-if="r.display && r.highlighted !== null" ng-bind-html-unsafe="r.highlighted" class="source_code"></div>
                             </li>
                         </ul>
+                        <button class="btn btn-success btn-xs pull-right" ng-show="viewing == 'revisions' && revisions.terminated" ng-click="getMoreRevisions(path, revisions.terminated)" style="margin-left: 20px">-- More --</button>
                     </div>
                 </div>
                 <div class="pull-left" style="width: 29%">

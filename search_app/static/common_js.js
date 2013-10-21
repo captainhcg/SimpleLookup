@@ -211,7 +211,6 @@ this.simplelookup = (function($) {
         }
       };
       $scope.getRevisions = function(obj) {
-        console.log(sameRecord(obj, $scope.revisions.obj));
         if (sameRecord(obj, $scope.revisions.obj)) {
           $scope.viewing = "revisions";
           return;
@@ -224,7 +223,37 @@ this.simplelookup = (function($) {
           $scope.viewing = "revisions";
           $scope.revisions = {};
           $scope.revisions.obj = obj;
-          return $scope.revisions.list = response.data;
+          $scope.revisions.list = response.data;
+          return $scope.revisions.terminated = response.terminated;
+        }, function() {
+          $scope.loading = false;
+          return notifyService.notify("Something is wrong...");
+        });
+      };
+      $scope.toggleDisplay = function(revision) {
+        var r, _i, _len, _ref;
+        if (revision.display) {
+          return revision.display = false;
+        } else {
+          _ref = $scope.revisions.list;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            r = _ref[_i];
+            r.display = false;
+          }
+          return revision.display = true;
+        }
+      };
+      $scope.getMoreRevisions = function(obj, last_hash) {
+        $scope.loading = true;
+        obj.last_hash = last_hash;
+        $scope.resource.track(obj).$then(function(data) {
+          var response;
+          response = data.data;
+          $scope.loading = false;
+          $scope.viewing = "revisions";
+          $scope.revisions.obj = obj;
+          $scope.revisions.list = $scope.revisions.list.concat(response.data);
+          return $scope.revisions.terminated = response.terminated;
         }, function() {
           $scope.loading = false;
           return notifyService.notify("Something is wrong...");

@@ -149,7 +149,6 @@ this.simplelookup = (($)->
                     false
 
             $scope.getRevisions = (obj)->
-                console.log(sameRecord obj, $scope.revisions.obj)
                 if sameRecord obj, $scope.revisions.obj
                     $scope.viewing = "revisions"
                     return
@@ -163,6 +162,32 @@ this.simplelookup = (($)->
                         $scope.revisions = {}
                         $scope.revisions.obj = obj;
                         $scope.revisions.list = response.data
+                        $scope.revisions.terminated = response.terminated
+                    ->
+                        $scope.loading = false
+                        notifyService.notify "Something is wrong..."
+                )
+                return
+
+            $scope.toggleDisplay = (revision)->
+                if revision.display
+                    revision.display = false
+                else
+                    for r in $scope.revisions.list
+                        r.display = false
+                    revision.display = true
+
+            $scope.getMoreRevisions = (obj, last_hash)->
+                $scope.loading = true
+                obj.last_hash = last_hash
+                $scope.resource.track(obj).$then(
+                    (data)->
+                        response = data.data
+                        $scope.loading = false
+                        $scope.viewing = "revisions"
+                        $scope.revisions.obj = obj;
+                        $scope.revisions.list = $scope.revisions.list.concat(response.data)
+                        $scope.revisions.terminated = response.terminated
                     ->
                         $scope.loading = false
                         notifyService.notify "Something is wrong..."
