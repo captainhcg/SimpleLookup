@@ -65,23 +65,20 @@
                         </div>
                     </div>
 
-                    <div ng-show="revisions.list && viewing=='revisions'">
-                        <ul class="list-group">
-                            <li class="list-group-item" ng-repeat="r in revisions.list">
-                                <div class="row">
-                                    <div class="cursor_pointer col-md-8">
-                                        <span ng-click="toggleDisplay(r)">
-                                            <a>[[r.revision.hash]]</a>: [[r.revision.subject]] ---- by [[r.revision.author]] on [[r.revision.date]]
-                                        </span>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button class="btn btn-danger btn-xs pull-right" ng-if="r.highlighted === null">Empty</button>
-                                    </div>
+                    <div class="row" style="" ng-show="revisions.list && viewing=='revisions'">
+                        <div ng-class="{'col-md-12': r.display, 'col-md-3': !r.display, 'hide': !r.display && show_revision_code }" ng-repeat="r in revisions.list">
+                            <div class="panel panel-info">
+                                <div class="panel-heading" ng-click="toggleDisplay(r)">
+                                    <strong class="panel-title">[[r.revision.hash]]</strong>
                                 </div>
-                                <div style="margin-top: 10px; margin-bottom: 5px" ng-if="r.display && r.highlighted !== null" ng-bind-html-unsafe="r.highlighted" class="source_code"></div>
-                            </li>
-                        </ul>
-                        <button class="btn btn-success btn-xs pull-right" ng-show="viewing == 'revisions' && revisions.terminated" ng-click="getMoreRevisions(path, revisions.terminated)" style="margin-left: 20px">-- More --</button>
+                                <div class="panel-body">
+                                    [[r.revision.subject]]<br>by [[r.revision.author]] on [[r.revision.date]]
+                                    <div style="margin-top: 10px; margin-bottom: 5px" ng-if="r.display && r.highlighted !== null" ng-bind-html-unsafe="r.highlighted" class="source_code"></div>
+                                    <button class="btn btn-danger btn-xs pull-right" ng-if="r.highlighted === null">Empty</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="clearfix btn btn-success pull-right" ng-show="viewing == 'revisions' && revisions.terminated" ng-click="getMoreRevisions(path, revisions.terminated)" style="margin-left: 20px">-- More --</button>
                     </div>
                 </div>
                 <div class="pull-left" style="width: 29%">

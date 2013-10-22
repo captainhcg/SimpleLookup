@@ -233,14 +233,16 @@ this.simplelookup = (function($) {
       $scope.toggleDisplay = function(revision) {
         var r, _i, _len, _ref;
         if (revision.display) {
-          return revision.display = false;
+          revision.display = false;
+          return $scope.show_revision_code = false;
         } else {
           _ref = $scope.revisions.list;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             r = _ref[_i];
             r.display = false;
           }
-          return revision.display = true;
+          revision.display = true;
+          return $scope.show_revision_code = true;
         }
       };
       $scope.getMoreRevisions = function(obj, last_hash) {
@@ -251,6 +253,7 @@ this.simplelookup = (function($) {
           response = data.data;
           $scope.loading = false;
           $scope.viewing = "revisions";
+          $scope.show_revision_code = false;
           $scope.revisions.obj = obj;
           $scope.revisions.list = $scope.revisions.list.concat(response.data);
           return $scope.revisions.terminated = response.terminated;
@@ -268,6 +271,7 @@ this.simplelookup = (function($) {
           $window.scrollTo(0, 0);
           $scope.loading = false;
           $scope.viewing = "code";
+          $scope.show_revision_code = false;
           response = data.data;
           $scope.result = response.record;
           $scope.result.project_id = request.project_id;

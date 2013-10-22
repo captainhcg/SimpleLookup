@@ -172,10 +172,13 @@ this.simplelookup = (($)->
             $scope.toggleDisplay = (revision)->
                 if revision.display
                     revision.display = false
+                    $scope.show_revision_code = false
                 else
                     for r in $scope.revisions.list
                         r.display = false
                     revision.display = true
+                    $scope.show_revision_code = true
+
 
             $scope.getMoreRevisions = (obj, last_hash)->
                 $scope.loading = true
@@ -185,6 +188,7 @@ this.simplelookup = (($)->
                         response = data.data
                         $scope.loading = false
                         $scope.viewing = "revisions"
+                        $scope.show_revision_code = false
                         $scope.revisions.obj = obj;
                         $scope.revisions.list = $scope.revisions.list.concat(response.data)
                         $scope.revisions.terminated = response.terminated
@@ -202,6 +206,7 @@ this.simplelookup = (($)->
                         $window.scrollTo 0, 0
                         $scope.loading = false
                         $scope.viewing = "code"
+                        $scope.show_revision_code = false
                         response = data.data
                         $scope.result = response.record
                         $scope.result.project_id = request.project_id
