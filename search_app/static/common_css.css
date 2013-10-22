@@ -6,6 +6,41 @@ body{
     display: table-cell;
     vertical-align: top;            
 }
+.columns {
+    -moz-column-count: 3;
+    -moz-column-gap: 10px;
+    -moz-column-fill: auto;
+    -webkit-column-count: 3;
+    -webkit-column-gap: 10px;
+    -webkit-column-fill: auto;
+    column-count: 3;
+    column-gap: 10px;
+    column-fill: auto;
+}
+
+.full{
+    width: 100%;
+}
+
+@media all and (min-width: 1280px) {
+    #columns {
+        column-count: 4;
+        -moz-column-count: 4;
+        -webkit-column-count: 4;
+    }
+}
+
+.pin {
+    display: inline-block;
+    box-shadow: 0 1px 2px rgba(34, 25, 25, 0.4);
+    margin: 0 2px 15px;
+    -webkit-column-break-inside: avoid;
+    -moz-column-break-inside: avoid;
+    column-break-inside: avoid;
+    background: -webkit-linear-gradient(45deg, #FFF, #F9F9F9);
+    opacity: 1;
+}
+
 #side-bar-container{
     display: table-cell;
     vertical-align: top;
