@@ -9,6 +9,8 @@ import ast
 import os
 import os.path
 import array
+import Queue
+from multiprocessing import Process
 from search_app.models import Module, Class, Function, Attribute
 from search_app.models import setProject, resetDB
 from optparse import OptionParser
@@ -136,10 +138,40 @@ class NodeParser(ast.NodeVisitor):
                     self.lines_depth[node.lineno] = item.depth+1
 
 
+def parseFile(queue):
+    while True:
+        fname = path = fullpath = None
+        if queue.empty():
+            return
+        else:
+            fname, path, fullpath = queue.get()
+            source_code = []
+        try:
+            with open(fullpath, "r") as f1:
+                print fullpath
+                source_code.append("")
+                for line in f1:
+                    try:
+                        source_code.append(line.decode('utf-8'))
+                    except UnicodeDecodeError:
+                        source_code.append(line.decode('iso-8859-1'))
+                f1.seek(0)
+                tree = ast.parse(f1.read())
+                tree.depth = 0
+                x = NodeParser(source_code, name=fname, path=path)
+                tree.module_id = None
+                tree.class_id = None
+                tree.function_id = None
+                x.visit(tree)
+        except Exception:
+            traceback.print_exc()
+            exit()
+
+
 def parseProject(project_id=0):
     setProject(project_id)
     resetDB()
-
+    queue =Queue.Queue()
     project_settings = settings.PROJECTS[project_id]
     project_path = project_settings['PROJECT_PATH']
     print "Parsing Project %s" % (project_settings['NAME'])
@@ -161,27 +193,19 @@ def parseProject(project_id=0):
         for f in files:
             if f.endswith(settings.FILE_EXTENSION):
                 fullpath = os.path.join(root, f)
-                source_code = []
-                try:
-                    with open(fullpath, "r") as f1:
-                        print fullpath
-                        source_code.append("")
-                        for line in f1:
-                            try:
-                                source_code.append(line.decode('utf-8'))
-                            except UnicodeDecodeError:
-                                source_code.append(line.decode('iso-8859-1'))
-                        f1.seek(0)
-                        tree = ast.parse(f1.read())
-                        tree.depth = 0
-                        x = NodeParser(source_code, name=f[:-name_offset], path=root[path_offset:])
-                        tree.module_id = None
-                        tree.class_id = None
-                        tree.function_id = None
-                        x.visit(tree)
-                except Exception:
-                    traceback.print_exc()
-                    exit()
+                queue.put((f[:-name_offset], root[path_offset:], fullpath))
+    num_processes = 4
+    processes = []
+    import time
+    ts = time.time()
+    for idx in xrange(num_processes):
+        processes.append(Process(target=parseFile, args=(queue,)))
+    for t in processes:
+        t.start()
+    for t in processes:
+        t.join()
+    te = time.time()
+    print te-ts
 
 if __name__ == "__main__":
     parser = OptionParser()
