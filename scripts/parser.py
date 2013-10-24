@@ -9,8 +9,8 @@ import ast
 import os
 import os.path
 import array
-import Queue
-from multiprocessing import Process
+import threading
+from Queue import Queue
 from search_app.models import Module, Class, Function, Attribute
 from search_app.models import setProject, resetDB
 from optparse import OptionParser
@@ -137,15 +137,16 @@ class NodeParser(ast.NodeVisitor):
                 for node in item.body:
                     self.lines_depth[node.lineno] = item.depth+1
 
-
+lock = threading.Lock()
 def parseFile(queue):
     while True:
         fname = path = fullpath = None
-        if queue.empty():
-            return
-        else:
-            fname, path, fullpath = queue.get()
-            source_code = []
+        with lock:
+            if queue.empty():
+                return
+            else:
+                fname, path, fullpath = queue.get()
+                source_code = []
         try:
             with open(fullpath, "r") as f1:
                 print fullpath
@@ -162,7 +163,8 @@ def parseFile(queue):
                 tree.module_id = None
                 tree.class_id = None
                 tree.function_id = None
-                x.visit(tree)
+                with lock:
+                    x.visit(tree)
         except Exception:
             traceback.print_exc()
             exit()
@@ -171,7 +173,7 @@ def parseFile(queue):
 def parseProject(project_id=0):
     setProject(project_id)
     resetDB()
-    queue =Queue.Queue()
+    queue = Queue()
     project_settings = settings.PROJECTS[project_id]
     project_path = project_settings['PROJECT_PATH']
     print "Parsing Project %s" % (project_settings['NAME'])
@@ -194,15 +196,15 @@ def parseProject(project_id=0):
             if f.endswith(settings.FILE_EXTENSION):
                 fullpath = os.path.join(root, f)
                 queue.put((f[:-name_offset], root[path_offset:], fullpath))
-    num_processes = 4
-    processes = []
+    num_threads = 4
+    threads = []
     import time
     ts = time.time()
-    for idx in xrange(num_processes):
-        processes.append(Process(target=parseFile, args=(queue,)))
-    for t in processes:
+    for idx in xrange(num_threads):
+        threads.append(threading.Thread(target=parseFile, args=(queue,)))
+    for t in threads:
         t.start()
-    for t in processes:
+    for t in threads:
         t.join()
     te = time.time()
     print te-ts
