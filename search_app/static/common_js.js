@@ -70,6 +70,7 @@ this.simplelookup = (function($) {
     '$window', function($window) {
       var supports_html5_storage, _supports_html5_storage;
       supports_html5_storage = function() {
+        var e;
         try {
           if ('localStorage' in $window && $window['localStorage'] !== null) {
             $window.localStorage.setItem('simplelookup', true);
@@ -77,7 +78,8 @@ this.simplelookup = (function($) {
           } else {
             return false;
           }
-        } catch (e) {
+        } catch (_error) {
+          e = _error;
           return false;
         }
       };
