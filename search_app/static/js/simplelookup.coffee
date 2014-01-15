@@ -131,7 +131,7 @@ this.simplelookup = (($)->
                 request = 'id': obj.id, 'type': obj.type, 'project_id': obj.project_id
                 $scope.resetView()
                 $scope.request_id += 1
-                $scope.info.project_id = obj.project_id if "project_id" in obj
+                $scope.info.project_id = obj.project_id if "project_id" of obj
                 search request, $scope.request_id
                 return
 
