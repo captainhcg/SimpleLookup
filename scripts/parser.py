@@ -7,7 +7,6 @@ import traceback
 import re
 import ast
 import os
-import os.path
 import array
 import threading
 from Queue import Queue
@@ -181,22 +180,30 @@ def parseProject(project_id=0):
     if "FOLDER_EXCLUDE_PATTERNS" in project_settings:
         for pattern in project_settings['FOLDER_EXCLUDE_PATTERNS']:
             folder_exclude_patterns.append(re.compile(pattern))
-    for root, dirs, files in os.walk(project_path):
-        continue_flag = False
-        if folder_exclude_patterns:
-            for pattern in folder_exclude_patterns:
-                if pattern.search(root):
-                    continue_flag = True
-                    break
-        if continue_flag:
-            continue
-        name_offset = len(settings.FILE_EXTENSION)
-        path_offset = len(project_path)
-        for f in files:
-            if f.endswith(settings.FILE_EXTENSION):
-                fullpath = os.path.join(root, f)
-                queue.put((f[:-name_offset], root[path_offset:], fullpath))
-    num_threads = 4
+    if os.path.isdir(project_path):
+        for root, dirs, files in os.walk(project_path):
+            continue_flag = False
+            if folder_exclude_patterns:
+                for pattern in folder_exclude_patterns:
+                    if pattern.search(root):
+                        continue_flag = True
+                        break
+            if continue_flag:
+                continue
+            name_offset = len(settings.FILE_EXTENSION)
+            path_offset = len(project_path)
+            for f in files:
+                if f.endswith(settings.FILE_EXTENSION):
+                    fullpath = os.path.join(root, f)
+                    queue.put((f[:-name_offset], root[path_offset:], fullpath))
+    elif os.path.isfile(project_path):
+        if project_path.endswith(settings.FILE_EXTENSION):
+            name_offset = len(settings.FILE_EXTENSION)
+            _, filename = os.path.split(project_path)
+            queue.put((filename[:-name_offset], "", project_path))
+
+
+    num_threads = 1
     threads = []
     import time
     ts = time.time()

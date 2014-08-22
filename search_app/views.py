@@ -43,7 +43,10 @@ def init_global(function):
 
 @app.route('/')
 def index():
-    return render_template('index.html', projects=projects)
+    try:
+        return render_template('index.html', projects=projects)
+    except Exception, e:
+        print e
 
 
 @app.route('/search')
